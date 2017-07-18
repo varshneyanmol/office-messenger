@@ -96,12 +96,23 @@ public class Server implements Runnable {
 		String[] arr = message.split(identityIdentifier);
 		RegisteredClient client = ServerDao.fetchClient(arr[0], arr[1]);
 		if (client != null) {
+			System.out.println("Client has been fetched");
 			loggedInClients.add(new LoggedInClient(client, clientIP, clientPort));
+			/**
+			 * sends an acknowledgement like: "/l/username"
+			 */
 			String ackToLoggedInClient = loginIdentifier + client.getUserName();
+			System.out.println("CLIENT USER NAME: " + client.getUserName());
+			System.out.println("CLIENT IP: " + clientIP);
+			System.out.println("CLIENT PORT: " + clientPort);
 			serverNetworking.send(ackToLoggedInClient.getBytes(), clientIP, clientPort);
 
 		} else {
-			String ackToRegisteredClient = errorIdentifier + "UserName or Password Incorrect";
+			System.out.println("client has NOT been FETCHED");
+			/**
+			 * sends an error message like: "/e/Username or Password Incorrect"
+			 */
+			String ackToRegisteredClient = errorIdentifier + "Username or Password Incorrect";
 			serverNetworking.send(ackToRegisteredClient.getBytes(), clientIP, clientPort);
 		}
 	}
@@ -121,7 +132,7 @@ public class Server implements Runnable {
 
 		if (client != null) {
 			/**
-			 * sends an acknowledgement message like: "/e/could not register"
+			 * sends an acknowledgement message like: "/e/ID already registered"
 			 * back to newly registered client
 			 */
 			String ackToRegisteredClient = errorIdentifier + "ID already registered";

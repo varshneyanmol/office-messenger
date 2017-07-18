@@ -4,6 +4,8 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -28,7 +30,10 @@ public class RegisterClientWindow extends JFrame {
 	private JPasswordField textFieldPassword;
 	private JPasswordField textFieldRePassword;
 
-	public RegisterClientWindow() {
+	private LoginClientWindow loginClientWindow;
+
+	public RegisterClientWindow(LoginClientWindow loginClientWindow) {
+		this.loginClientWindow = loginClientWindow;
 		generateWindow();
 	}
 
@@ -149,6 +154,13 @@ public class RegisterClientWindow extends JFrame {
 		btnRegister.setBounds(135, 330, 120, 30);
 		contentPane.add(btnRegister);
 
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				dispose();
+				loginClientWindow.setVisible(true);
+			}
+		});
+
 		setVisible(true);
 	}
 
@@ -157,13 +169,16 @@ public class RegisterClientWindow extends JFrame {
 
 		if (validateValues(employeeID, serverIP, serverPort)) {
 			/**
-			 * Logic to Register the client
+			 * Code to Register the client
 			 */
-
 			Client client = new Client(Integer.parseInt(employeeID), name, designation, InetAddress.getByName(serverIP),
 					Integer.parseInt(serverPort));
 			client.registerClient(password);
 			System.out.println("Registered");
+
+			new ClientWindow();
+			this.dispose();
+			loginClientWindow.dispose();
 
 		} else {
 			showInvalidDialog("Invalid Values.");

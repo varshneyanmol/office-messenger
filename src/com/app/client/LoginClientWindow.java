@@ -28,7 +28,7 @@ public class LoginClientWindow extends JFrame {
 			e.printStackTrace();
 		}
 
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setTitle("Login Client");
 		setSize(320, 250);
 		setLocationRelativeTo(null);
@@ -42,7 +42,7 @@ public class LoginClientWindow extends JFrame {
 		JButton btnRegister = new JButton("Register");
 		btnRegister.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				new RegisterClientWindow();
+				createRegisterClientWindow();
 			}
 		});
 		btnRegister.setBounds(210, 12, 80, 25);
@@ -73,11 +73,14 @@ public class LoginClientWindow extends JFrame {
 				String password = String.copyValueOf(textFieldPassword.getPassword());
 
 				if (!(userName.equals("") || password.equals(""))) {
-					if (validate(userName, password)) {
-						// main Chat window
-					} else {
-						showInvalidDialog("Invalid username or password.");
-					}
+					/*
+					 * if (validate(userName, password)) { // main Chat window }
+					 * else { showInvalidDialog("Invalid username or password."
+					 * ); }
+					 */
+					new Client().loginClient(userName, password);
+					new ClientWindow();
+					dispose();
 				}
 			}
 		});
@@ -86,16 +89,20 @@ public class LoginClientWindow extends JFrame {
 		setVisible(true);
 	}
 
-	private boolean validate(String username, String password) {
-		boolean result = false;
-		/**
-		 * Code to validate user name and password
-		 */
-
-		
-		return result;
+	private void createRegisterClientWindow() {
+		this.setVisible(false);
+		new RegisterClientWindow(this);
 	}
 
+	/*
+	 * private boolean validate(String username, String password) { boolean
+	 * result = false;
+	 *//**
+		 * Code to validate user name and password
+		 *//*
+		 * 
+		 * return result; }
+		 */
 	private void showInvalidDialog(String message) {
 		JDialog invalidDialog = new JDialog(this, "Invalid Values", true);
 		JButton btnOk = new JButton("OK");

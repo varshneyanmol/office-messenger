@@ -35,7 +35,7 @@ public class ClientNetworking {
 		return true;
 	}
 
-	public String receive() {
+	public DatagramPacket receive() {
 		byte[] data = new byte[MAX_PACKET_SIZE];
 		DatagramPacket packet = new DatagramPacket(data, data.length);
 		try {
@@ -43,8 +43,7 @@ public class ClientNetworking {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		String message = new String(packet.getData());
-		return message;
+		return packet;
 	}
 
 	public void send(byte[] data) {
