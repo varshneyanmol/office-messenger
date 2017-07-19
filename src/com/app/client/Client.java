@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
+import com.app.client.chatWindowGUI.MainChatWindow;
+
 public class Client {
 	private boolean running = false;
 	private int id;
@@ -24,7 +26,11 @@ public class Client {
 	private String registerIdentifier = config.getString("register-identifier");
 	private String loginIdentifier = config.getString("login-identifier");
 	private String identityIdentifier = config.getString("identity-identifier");
+	private String broadcastIdentifier = config.getString("broadcast-identifier");
+	private String groupIdentifier = config.getString("group-identifier");
 	private String errorIdentifier = config.getString("error-identifier");
+
+	private MainChatWindow mainChatWindow;
 
 	private Thread listen;
 
@@ -57,7 +63,8 @@ public class Client {
 
 	public boolean loginClient(String userName, String password) {
 		boolean result = false;
-		ResourceBundle clientServerBundle = ResourceBundle.getBundle("com.app.client.ClientServer");
+		String bundleName = "ClientServer" + userName;
+		ResourceBundle clientServerBundle = ResourceBundle.getBundle("com.app.client." + bundleName);
 		try {
 			this.serverIP = InetAddress.getByName(clientServerBundle.getString("serverIP"));
 			this.serverPort = Integer.parseInt(clientServerBundle.getString("serverPort"));
@@ -94,7 +101,9 @@ public class Client {
 		String message = new String(packet.getData()).trim();
 		System.out.println(message);
 
-		if (message.startsWith(registerIdentifier)) {
+		if (message.startsWith(broadcastIdentifier)) {
+			mainChatWindow.process(message);
+		} else if (message.startsWith(registerIdentifier)) {
 			/**
 			 * receives a message like: "/r/clientUserName"
 			 */
@@ -105,7 +114,7 @@ public class Client {
 			/**
 			 * receives a message like: "/l/clientUserName"
 			 */
-			message = message.substring(registerIdentifier.length(), message.length());
+			message = message.substring(loginIdentifier.length(), message.length());
 			processLoginAck(message);
 		} else if (message.startsWith(errorIdentifier)) {
 
@@ -113,7 +122,9 @@ public class Client {
 	}
 
 	private void processLoginAck(String message) {
-		System.out.println("Logged in with user name: " + message);
+		setUserName(message);
+		mainChatWindow = new MainChatWindow(this);
+		mainChatWindow.process("Successfully logged in");
 	}
 
 	private void processRegisterAck(String message, InetAddress serverIP, int serverPort) {
@@ -124,8 +135,9 @@ public class Client {
 		properties.setProperty("serverIP", serverIP.getHostAddress());
 		properties.setProperty("serverPort", Integer.toString(serverPort));
 
+		String fileName = "ClientServer" + userName;
 		try {
-			OutputStream outputStream = new FileOutputStream("src/com/app/client/ClientServer.properties");
+			OutputStream outputStream = new FileOutputStream("src/com/app/client/" + fileName + ".properties");
 			String comment = "This file contains the username, IP and port of the client so that client can login to the server next time without having to enter the server IP and server Port again.";
 			properties.store(outputStream, comment);
 
@@ -134,6 +146,10 @@ public class Client {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		mainChatWindow = new MainChatWindow(this);
+		String msg = "Successfully REGISTERED with to server" + serverIP + ":" + serverPort + " with user name: "
+				+ message;
+		mainChatWindow.process(msg);
 	}
 
 	private void startClient() {
@@ -141,7 +157,15 @@ public class Client {
 		listen();
 	}
 
+	public String getUserName() {
+		return this.userName;
+	}
+
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public void send(String message) {
+		clientNetworking.send(message.getBytes());
 	}
 }

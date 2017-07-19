@@ -21,6 +21,8 @@ public class Server implements Runnable {
 	private String registerIdentifier = config.getString("register-identifier");
 	private String loginIdentifier = config.getString("login-identifier");
 	private String identityIdentifier = config.getString("identity-identifier");
+	private String broadcastIdentifier = config.getString("broadcast-identifier");
+	private String groupIdentifier = config.getString("group-identifier");
 	private String errorIdentifier = config.getString("error-identifier");
 
 	private ArrayList<LoggedInClient> loggedInClients = new ArrayList<LoggedInClient>();
@@ -86,6 +88,20 @@ public class Server implements Runnable {
 			message = message.substring(loginIdentifier.length(), message.length());
 			loginClient(message, packet.getAddress(), packet.getPort());
 
+		} else if (message.startsWith(broadcastIdentifier)) {
+			/**
+			 * receives a message like: "/b/clientID/i/message"
+			 */
+			broadcast(message, false);
+		}
+
+	}
+
+	private void broadcast(String message, boolean attachBroadcastIdentifier) {
+		LoggedInClient client;
+		for (int i = 0; i < loggedInClients.size(); i++) {
+			client = loggedInClients.get(i);
+			serverNetworking.send(message.getBytes(), client.getIp(), client.getPort());
 		}
 	}
 

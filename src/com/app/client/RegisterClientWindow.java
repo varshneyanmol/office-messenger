@@ -19,6 +19,10 @@ import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
+import com.app.client.chatWindowGUI.MainChatWindow;
+
+import java.awt.Font;
+
 public class RegisterClientWindow extends JFrame {
 
 	private JPanel contentPane;
@@ -56,30 +60,35 @@ public class RegisterClientWindow extends JFrame {
 		setContentPane(contentPane);
 
 		textFieldName = new JTextField();
+		textFieldName.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		textFieldName.setText("Anmol");
 		textFieldName.setBounds(195, 20, 200, 25);
 		contentPane.add(textFieldName);
 		textFieldName.setColumns(10);
 
 		textFieldEmployeeID = new JTextField();
+		textFieldEmployeeID.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		textFieldEmployeeID.setText("111");
 		textFieldEmployeeID.setBounds(195, 60, 200, 25);
 		contentPane.add(textFieldEmployeeID);
 		textFieldEmployeeID.setColumns(10);
 
 		textFieldDesignation = new JTextField();
+		textFieldDesignation.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		textFieldDesignation.setText("DEVELOPER");
 		textFieldDesignation.setBounds(195, 100, 200, 25);
 		contentPane.add(textFieldDesignation);
 		textFieldDesignation.setColumns(10);
 
 		textFieldServerIP = new JTextField();
+		textFieldServerIP.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		textFieldServerIP.setText("127.0.0.1");
 		textFieldServerIP.setBounds(195, 140, 200, 25);
 		contentPane.add(textFieldServerIP);
 		textFieldServerIP.setColumns(10);
 
 		textFieldServerPort = new JTextField();
+		textFieldServerPort.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		textFieldServerPort.setText("7890");
 		textFieldServerPort.setBounds(195, 180, 200, 25);
 		contentPane.add(textFieldServerPort);
@@ -176,7 +185,6 @@ public class RegisterClientWindow extends JFrame {
 			client.registerClient(password);
 			System.out.println("Registered");
 
-			new ClientWindow();
 			this.dispose();
 			loginClientWindow.dispose();
 

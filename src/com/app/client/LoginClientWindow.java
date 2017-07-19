@@ -5,6 +5,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -14,6 +15,10 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+
+import com.app.client.chatWindowGUI.MainChatWindow;
+
+import java.awt.Font;
 
 public class LoginClientWindow extends JFrame {
 
@@ -53,9 +58,12 @@ public class LoginClientWindow extends JFrame {
 		getContentPane().add(lblUserName);
 
 		textFieldUserName = new JTextField();
+		textFieldUserName.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		textFieldUserName.setBounds(130, 60, 160, 25);
 		getContentPane().add(textFieldUserName);
 		textFieldUserName.setColumns(10);
+		// textFieldUserName.setBorder(BorderFactory.createEmptyBorder(5, 5, 5,
+		// 5));
 
 		JLabel lblPassword = new JLabel("Password");
 		lblPassword.setBounds(20, 120, 70, 25);
@@ -79,7 +87,6 @@ public class LoginClientWindow extends JFrame {
 					 * ); }
 					 */
 					new Client().loginClient(userName, password);
-					new ClientWindow();
 					dispose();
 				}
 			}
