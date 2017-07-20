@@ -1,5 +1,8 @@
 package com.app.server.hibernate.dao;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -10,14 +13,15 @@ import com.app.server.RegisteredClient;
 import com.app.server.hibernate.util.HibernateUtil;
 
 public class ServerDao {
+
 	public static boolean saveClient(RegisteredClient client) {
-		int id = -1;
+		String id = null;
 		Session session = HibernateUtil.openSession();
 		Transaction tx = session.beginTransaction();
-		id = (Integer) session.save(client);
+		id = (String) session.save(client);
 		tx.commit();
 		session.close();
-		if (id != -1) {
+		if (id != null) {
 			return true;
 		}
 		return false;
@@ -37,7 +41,7 @@ public class ServerDao {
 		return client;
 	}
 
-	public static RegisteredClient fetchClient(int id) {
+	public static RegisteredClient fetchClient(String id) {
 		RegisteredClient client = null;
 
 		Session session = HibernateUtil.openSession();
@@ -48,6 +52,15 @@ public class ServerDao {
 		session.close();
 
 		return client;
+	}
+
+	public static ArrayList<RegisteredClient> fetchAllClients() {
+		ArrayList<RegisteredClient> list = new ArrayList<RegisteredClient>();
+		Session session = HibernateUtil.openSession();
+		Criteria criteria = session.createCriteria(RegisteredClient.class);
+		list = (ArrayList<RegisteredClient>) criteria.list();
+		session.close();
+		return list;
 	}
 
 }

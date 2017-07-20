@@ -180,7 +180,7 @@ public class RegisterClientWindow extends JFrame {
 			/**
 			 * Code to Register the client
 			 */
-			Client client = new Client(Integer.parseInt(employeeID), name, designation, InetAddress.getByName(serverIP),
+			Client client = new Client(employeeID, name, designation, InetAddress.getByName(serverIP),
 					Integer.parseInt(serverPort));
 			client.registerClient(password);
 			System.out.println("Registered");
@@ -217,7 +217,7 @@ public class RegisterClientWindow extends JFrame {
 		/**
 		 * Logic to validate Employee ID, Server IP and Server port
 		 */
-		if (employeeID.matches("[0-9]+")) {
+		if (employeeID.matches("[0-9a-zA-z]+")) {
 			if (serverIP.matches("[0-9]+.[0-9]+.[0-9]+.[0-9]+")) {
 				if (serverPort.matches("[0-9]+")) {
 					result = true;

@@ -3,7 +3,7 @@ package com.app.server;
 import java.net.InetAddress;
 
 public class RegisteredClient {
-	private int id;
+	private String id;
 	private String name;
 	private String designation;
 	private String userName;
@@ -13,7 +13,7 @@ public class RegisteredClient {
 
 	}
 
-	public RegisteredClient(int id, String name, String designation, String userName, String password) {
+	public RegisteredClient(String id, String name, String designation, String userName, String password) {
 		this.id = id;
 		this.name = name;
 		this.designation = designation;
@@ -21,11 +21,11 @@ public class RegisteredClient {
 		this.password = password;
 	}
 
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -52,7 +52,6 @@ public class RegisteredClient {
 	public void setUserName(String userName) {
 		this.userName = userName;
 	}
-
 
 	public String getPassword() {
 		return password;

@@ -12,13 +12,20 @@ import java.awt.event.KeyEvent;
 import java.util.ResourceBundle;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+
+import org.hibernate.resource.transaction.backend.jta.internal.JtaIsolationDelegate;
 
 import com.app.client.Client;
 
@@ -32,6 +39,7 @@ public class ChatPanel {
 	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
 	private String broadcastIdentifier = config.getString("broadcast-identifier");
 	private String groupIdentifier = config.getString("group-identifier");
+	private String identityIdentifier = config.getString("identity-identifier");
 
 	public ChatPanel(Client client) {
 		this.client = client;
@@ -109,15 +117,39 @@ public class ChatPanel {
 		messageField.setText("");
 		message = message.trim();
 		if (!message.equals("")) {
-			message = broadcastIdentifier + message;
+			message = broadcastIdentifier + client.getId() + identityIdentifier + message;
 			client.send(message);
 		}
 	}
 
-	public void console(String message) {
+	public void styleBroadcastMessage(String message) {
+		/**
+		 * gets a msg like: "username: message" prepares a styled message like:
+		 * "username<colored|bold>: message"
+		 */
+		String[] arr = message.split(":");
+		String userName = arr[0];
+		message = arr[1];
+
 		StyledDocument doc = chatHistory.getStyledDocument();
+
+		SimpleAttributeSet attributes = new SimpleAttributeSet();
+		attributes.addAttribute(StyleConstants.CharacterConstants.Bold, Boolean.TRUE);
+		attributes.addAttribute(StyleConstants.CharacterConstants.Foreground, new Color(41, 137, 46));
+
+		console(userName + ":", attributes, false);
+		console(message, null, true);
+
+	}
+
+	public void console(String message, SimpleAttributeSet attributes, boolean newLine) {
+		StyledDocument doc = chatHistory.getStyledDocument();
+
+		if (newLine) {
+			message = message + "\n";
+		}
 		try {
-			doc.insertString(doc.getLength(), message + "\n", null);
+			doc.insertString(doc.getLength(), message, attributes);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}

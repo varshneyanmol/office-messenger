@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -17,8 +18,11 @@ import javax.swing.border.EmptyBorder;
 
 import com.app.client.Client;
 import com.app.client.group.Group;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class MainChatWindow extends JFrame {
+	private final int BROADCAST_GROUP_ID = 0;
 	private static final long serialVersionUID = 1L;
 
 	private JPanel contentPane;
@@ -28,11 +32,15 @@ public class MainChatWindow extends JFrame {
 	private JTabbedPane optionsAreaPane;
 	private ChatPanel broadcastChat;
 
+	private BroadcastPanel broadcastPanel;
+	private GroupsPanel groupsPanel;
+
 	private ArrayList<Group> groups;
 
 	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
 	private String broadcastIdentifier = config.getString("broadcast-identifier");
 	private String groupIdentifier = config.getString("group-identifier");
+	private String logoutIdentifier = config.getString("logout-identifier");
 
 	public MainChatWindow(Client client) {
 		this.client = client;
@@ -55,6 +63,18 @@ public class MainChatWindow extends JFrame {
 
 		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
+		JMenuItem exit = new JMenuItem("Exit");
+		mnFile.add(exit);
+
+		JMenu mnSettings = new JMenu("Settings");
+		menuBar.add(mnSettings);
+		JMenuItem logout = new JMenuItem("Logout");
+		logout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				logout(client);
+			}
+		});
+		mnSettings.add(logout);
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -80,11 +100,11 @@ public class MainChatWindow extends JFrame {
 		optionsAreaPane = new JTabbedPane();
 		chatAreaPane = new JTabbedPane();
 
-		JPanel broadcastPanel = new BroadcastPanel().getPanel();
-		JPanel groupsPanel = new GroupsPanel().getPanel();
+		broadcastPanel = new BroadcastPanel();
+		groupsPanel = new GroupsPanel();
 
-		optionsAreaPane.add("Broadcast", broadcastPanel);
-		optionsAreaPane.add("Groups", groupsPanel);
+		optionsAreaPane.add("Broadcast", broadcastPanel.getPanel());
+		optionsAreaPane.add("Groups", groupsPanel.getPanel());
 
 		broadcastChat = new ChatPanel(client);
 		ArrayList<Integer> group1Members = new ArrayList<Integer>();
@@ -115,6 +135,14 @@ public class MainChatWindow extends JFrame {
 		return client;
 	}
 
+	private void logout(Client client) {
+		/**
+		 * sends a msg like: "/x/clientID"
+		 */
+		String message = logoutIdentifier + client.getId();
+		client.send(message);
+	}
+
 	public void process(String message) {
 		/**
 		 * receives a message like: "/b/message" OR
@@ -122,12 +150,55 @@ public class MainChatWindow extends JFrame {
 		 */
 		if (message.startsWith(broadcastIdentifier)) {
 			message = message.substring(broadcastIdentifier.length(), message.length());
-			broadcastChat.console(message);
+			broadcastChat.styleBroadcastMessage(message);
+
 		} else if (message.startsWith(groupIdentifier)) {
 
 		} else {
-			broadcastChat.console(message);
+			broadcastChat.console(message, null, true);
 		}
+	}
+
+	public void updateList(String[] clients, int groupID) {
+		if (groupID == BROADCAST_GROUP_ID) {
+			for (int i = 0; i < clients.length; i++) {
+				broadcastPanel.addClient(clients[i]);
+			}
+		} else {
+
+		}
+	}
+
+	public void updateList(String client, int groupID) {
+		if (groupID == BROADCAST_GROUP_ID) {
+			broadcastPanel.addClient(client);
+		} else {
+
+		}
+	}
+
+	public void updateList(String client) {
+		// update client in all the groups -> pending
+		broadcastPanel.addClient(client);
+
+	}
+
+	public void addToList(String client) {
+		broadcastPanel.addClientToEnd(client);
+	}
+
+	public void removeFromList(String clientUserName, int groupID) {
+		// removes the user from group's list -> pending
+	}
+
+	public void removeFromList(String clientUserName) {
+		// remove from all teh groups -> pending
+		broadcastPanel.removeClient(clientUserName);
+	}
+
+	public void clearAllLists() {
+		// clear the list of all the groups -> pending
+		broadcastPanel.clear();
 	}
 
 	private void addPanel(String panelName, JPanel panel) {

@@ -14,18 +14,22 @@ public class Server implements Runnable {
 	private InetAddress ip;
 	private int port;
 
+	private final int BROADCAST_GROUP_ID = 0;
 	private ServerNetworking serverNetworking;
 	private Thread runServer, listen;
 
 	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
 	private String registerIdentifier = config.getString("register-identifier");
 	private String loginIdentifier = config.getString("login-identifier");
+	private String logoutIdentifier = config.getString("logout-identifier");
 	private String identityIdentifier = config.getString("identity-identifier");
 	private String broadcastIdentifier = config.getString("broadcast-identifier");
 	private String groupIdentifier = config.getString("group-identifier");
 	private String errorIdentifier = config.getString("error-identifier");
+	private String updateListIdentifier = config.getString("update-list-identifier");
 
 	private ArrayList<LoggedInClient> loggedInClients = new ArrayList<LoggedInClient>();
+	private ArrayList<RegisteredClient> registeredClients;
 
 	public Server(InetAddress ip, int port) {
 		this.ip = ip;
@@ -92,12 +96,77 @@ public class Server implements Runnable {
 			/**
 			 * receives a message like: "/b/clientID/i/message"
 			 */
-			broadcast(message, false);
+			prepareBroadcastMessage(message);
+
+		} else if (message.startsWith(logoutIdentifier)) {
+			/**
+			 * receives a msg like: "/x/clientID"
+			 */
+			message = message.substring(logoutIdentifier.length(), message.length());
+			processLogoutMessage(message);
+
 		}
 
 	}
 
+	private void processLogoutMessage(String clientID) {
+		LoggedInClient client = getLoggedInClient(clientID);
+		if (client == null) {
+			return;
+		}
+		loggedInClients.remove(client);
+
+		/**
+		 * sends an ack to the logged out client like: "/x/clientUserName"
+		 */
+		String ackToLoggedOutClient = logoutIdentifier + client.getClient().getUserName();
+		serverNetworking.send(ackToLoggedOutClient.getBytes(), client.getIp(), client.getPort());
+
+		/**
+		 * sends an update list msg to all the logged in clients like :
+		 * "/u//x/clientUserName"
+		 */
+		String msgToLoggedInClients = updateListIdentifier + logoutIdentifier + client.getClient().getUserName();
+		for (int i = 0; i < loggedInClients.size(); i++) {
+			LoggedInClient c = loggedInClients.get(i);
+			serverNetworking.send(msgToLoggedInClients.getBytes(), c.getIp(), c.getPort());
+
+		}
+	}
+
+	private LoggedInClient getLoggedInClient(String clientID) {
+		for (int i = 0; i < loggedInClients.size(); i++) {
+			LoggedInClient c = loggedInClients.get(i);
+			if (c.getClient().getId().equals(clientID)) {
+				return c;
+			}
+		}
+		return null;
+	}
+
+	private void prepareBroadcastMessage(String message) {
+		/**
+		 * prepares a msg like: "/b/clientUserName: message"
+		 */
+		message = message.substring(broadcastIdentifier.length(), message.length());
+		String[] arr = message.split(identityIdentifier);
+		String clientID = arr[0];
+		message = arr[1];
+
+		for (int i = 0; i < loggedInClients.size(); i++) {
+			LoggedInClient c = loggedInClients.get(i);
+			if (c.getClient().getId().equals(clientID)) {
+				message = c.getClient().getUserName() + ": " + message;
+				break;
+			}
+		}
+		broadcast(message, true);
+	}
+
 	private void broadcast(String message, boolean attachBroadcastIdentifier) {
+		if (attachBroadcastIdentifier) {
+			message = broadcastIdentifier + message;
+		}
 		LoggedInClient client;
 		for (int i = 0; i < loggedInClients.size(); i++) {
 			client = loggedInClients.get(i);
@@ -112,19 +181,24 @@ public class Server implements Runnable {
 		String[] arr = message.split(identityIdentifier);
 		RegisteredClient client = ServerDao.fetchClient(arr[0], arr[1]);
 		if (client != null) {
-			System.out.println("Client has been fetched");
 			loggedInClients.add(new LoggedInClient(client, clientIP, clientPort));
+
 			/**
-			 * sends an acknowledgement like: "/l/username"
+			 * sends an acknowledgement like: "/l/username/i/clientID"
 			 */
-			String ackToLoggedInClient = loginIdentifier + client.getUserName();
-			System.out.println("CLIENT USER NAME: " + client.getUserName());
-			System.out.println("CLIENT IP: " + clientIP);
-			System.out.println("CLIENT PORT: " + clientPort);
+			String ackToLoggedInClient = loginIdentifier + client.getUserName() + identityIdentifier + client.getId();
 			serverNetworking.send(ackToLoggedInClient.getBytes(), clientIP, clientPort);
 
+			/**
+			 * sends an ack like: "/u//l/username" to already logged in clients.
+			 */
+			String ackToAllLoggedInClients = updateListIdentifier + loginIdentifier + client.getUserName();
+			for (int i = 0; i < loggedInClients.size(); i++) {
+				LoggedInClient c = loggedInClients.get(i);
+				serverNetworking.send(ackToAllLoggedInClients.getBytes(), c.getIp(), c.getPort());
+			}
+
 		} else {
-			System.out.println("client has NOT been FETCHED");
 			/**
 			 * sends an error message like: "/e/Username or Password Incorrect"
 			 */
@@ -139,7 +213,7 @@ public class Server implements Runnable {
 		 */
 
 		String[] arr = message.split(identityIdentifier);
-		int clientID = Integer.parseInt(arr[0]);
+		String clientID = arr[0];
 		String clientName = arr[1];
 		String clientDesignation = arr[2];
 		String clientPassword = arr[3];
@@ -165,10 +239,31 @@ public class Server implements Runnable {
 		ServerDao.saveClient(client);
 
 		/**
-		 * sends an acknowledgement message like: "/r/clientUserName" back to
-		 * newly registered client
+		 * sends an acknowledgement message like:
+		 * "/r/clientUserName/i/groupID/i/client1UserName,client2UserName...,"
+		 * back to newly registered client
 		 */
-		String ackToRegisteredClient = registerIdentifier + clientUserName;
+
+		String ackToRegisteredClient = registerIdentifier + clientUserName + identityIdentifier + BROADCAST_GROUP_ID
+				+ identityIdentifier;
+		registeredClients = ServerDao.fetchAllClients();
+		for (int i = 0; i < registeredClients.size(); i++) {
+			ackToRegisteredClient = ackToRegisteredClient + registeredClients.get(i).getUserName() + ",";
+		}
+
+		/**
+		 * sends an acknowledgement to all logged in clients like:
+		 * "/u//r/clientUserName/i/groupID"
+		 */
+		String ackToLoggedInClients = updateListIdentifier + registerIdentifier + clientUserName + identityIdentifier
+				+ BROADCAST_GROUP_ID;
+
+		for (int i = 0; i < loggedInClients.size(); i++) {
+			LoggedInClient c = loggedInClients.get(i);
+			serverNetworking.send(ackToLoggedInClients.getBytes(), c.getIp(), c.getPort());
+		}
+
+		System.out.println(ackToRegisteredClient);
 		serverNetworking.send(ackToRegisteredClient.getBytes(), clientIP, clientPort);
 		loggedInClients.add(new LoggedInClient(client, clientIP, clientPort));
 	}

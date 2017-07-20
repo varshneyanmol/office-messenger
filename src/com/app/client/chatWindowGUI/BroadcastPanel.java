@@ -12,6 +12,8 @@ import javax.swing.JScrollPane;
 public class BroadcastPanel {
 	private JPanel panel;
 
+	private RegisteredClientsList registeredClientslist;
+
 	public BroadcastPanel() {
 		panel = new JPanel();
 		createLayout();
@@ -32,16 +34,30 @@ public class BroadcastPanel {
 		gbc_lblBroadcastUsersList.gridy = 0;
 		panel.add(lblBroadcastUsersList, gbc_lblBroadcastUsersList);
 
-		RegisteredUsersList userlist = new RegisteredUsersList();
+		registeredClientslist = new RegisteredClientsList();
 
-		JList<String> list = userlist.getList();
-		JScrollPane listScroll = new JScrollPane(list);
+		JScrollPane listScroll = new JScrollPane(registeredClientslist.getList());
 		GridBagConstraints gbc_list = new GridBagConstraints();
 		gbc_list.fill = GridBagConstraints.BOTH;
 		gbc_list.gridx = 0;
 		gbc_list.gridy = 2;
 		panel.add(listScroll, gbc_list);
+	}
 
+	public void addClient(String clientUserName) {
+		registeredClientslist.addClient(clientUserName);
+	}
+
+	public void addClientToEnd(String clientUserName) {
+		registeredClientslist.addClientToEnd(clientUserName);
+	}
+
+	public void removeClient(String clientUserName) {
+		registeredClientslist.removeClient(clientUserName);
+	}
+
+	public void clear() {
+		registeredClientslist.clear();
 	}
 
 	public JPanel getPanel() {
