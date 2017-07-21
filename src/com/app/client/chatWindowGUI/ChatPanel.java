@@ -11,21 +11,18 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ResourceBundle;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-
-import org.hibernate.resource.transaction.backend.jta.internal.JtaIsolationDelegate;
 
 import com.app.client.Client;
 
@@ -93,7 +90,11 @@ public class ChatPanel {
 		panel.add(messageField, gbc_messageField);
 		messageField.setColumns(10);
 
-		JButton btnSend = new JButton("send");
+		JButton btnSend = new JButton();
+		btnSend.setIcon(new ImageIcon("src/com/app/client/resources/icons/send.png"));
+		// btnSend.setBorder(null);
+		btnSend.setBorder(BorderFactory.createEmptyBorder());
+		btnSend.setContentAreaFilled(false);
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendMessage(messageField.getText());
@@ -117,8 +118,10 @@ public class ChatPanel {
 		messageField.setText("");
 		message = message.trim();
 		if (!message.equals("")) {
-			message = broadcastIdentifier + client.getId() + identityIdentifier + message;
-			client.send(message);
+			if (client.getId() != null) {
+				message = broadcastIdentifier + client.getId() + identityIdentifier + message;
+				client.send(message);
+			}
 		}
 	}
 
@@ -146,7 +149,7 @@ public class ChatPanel {
 		StyledDocument doc = chatHistory.getStyledDocument();
 
 		if (newLine) {
-			message = message + "\n";
+			message = message + "\n\n";
 		}
 		try {
 			doc.insertString(doc.getLength(), message, attributes);

@@ -44,23 +44,15 @@ public class BroadcastPanel {
 		panel.add(listScroll, gbc_list);
 	}
 
-	public void addClient(String clientUserName) {
-		registeredClientslist.addClient(clientUserName);
-	}
-
-	public void addClientToEnd(String clientUserName) {
-		registeredClientslist.addClientToEnd(clientUserName);
-	}
-
-	public void removeClient(String clientUserName) {
-		registeredClientslist.removeClient(clientUserName);
-	}
-
-	public void clear() {
-		registeredClientslist.clear();
-	}
-
 	public JPanel getPanel() {
 		return this.panel;
+	}
+
+	public void updateClient(String clientUserName, boolean isOnline) {
+		registeredClientslist.updateClient(clientUserName, isOnline);
+	}
+
+	public void logoutAllFromLists() {
+		registeredClientslist.logoutAllFromLists();
 	}
 }

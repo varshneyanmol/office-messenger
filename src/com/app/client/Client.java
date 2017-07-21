@@ -22,6 +22,8 @@ public class Client {
 	private int serverPort;
 	private ClientNetworking clientNetworking;
 
+	private final int BROADCAST_GROUP_ID = 0;
+
 	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
 	private String registerIdentifier = config.getString("register-identifier");
 	private String loginIdentifier = config.getString("login-identifier");
@@ -31,6 +33,7 @@ public class Client {
 	private String groupIdentifier = config.getString("group-identifier");
 	private String errorIdentifier = config.getString("error-identifier");
 	private String updateListIdentifier = config.getString("update-list-identifier");
+	private String listClientsIdentifier = config.getString("list-clients-identifier");
 
 	private MainChatWindow mainChatWindow;
 
@@ -108,8 +111,7 @@ public class Client {
 
 		} else if (message.startsWith(registerIdentifier)) {
 			/**
-			 * receives a message like:
-			 * "/r/clientUserName/i/client1UserName,client2UserName...,"
+			 * receives a message like: "/r/clientUserName"
 			 */
 			message = message.substring(registerIdentifier.length(), message.length());
 			processRegisterAck(message, packet.getAddress(), packet.getPort());
@@ -141,7 +143,8 @@ public class Client {
 
 	private void processLogoutMessage() {
 		mainChatWindow.process("You have been logged out.");
-		mainChatWindow.clearAllLists();
+		this.id = null;
+		mainChatWindow.logoutAllFromLists();
 	}
 
 	private void processUpdateListMessage(String message) {
@@ -152,24 +155,38 @@ public class Client {
 			String[] arr = message.split(registerIdentifier + "|" + identityIdentifier);
 			String clientUserName = arr[1];
 			int groupID = Integer.parseInt(arr[2]);
-			mainChatWindow.updateList(clientUserName + "**", groupID);
+			mainChatWindow.updateList(clientUserName, true, groupID);
 
 		} else if (message.startsWith(loginIdentifier)) {
 			/**
 			 * receives a msg like: "/l/username"
 			 */
 			String clientUserName = message.substring(loginIdentifier.length(), message.length());
-			mainChatWindow.removeFromList(clientUserName);
-			mainChatWindow.updateList(clientUserName + "**");
+			mainChatWindow.updateList(clientUserName, true);
 
 		} else if (message.startsWith(logoutIdentifier)) {
 			/**
 			 * receives a msg like: "/x/clientUserName"
 			 */
 			String clientUserName = message.substring(loginIdentifier.length(), message.length());
-			mainChatWindow.removeFromList(clientUserName + "**");
-			mainChatWindow.addToList(clientUserName);
+			mainChatWindow.updateList(clientUserName, false);
 
+		} else if (message.startsWith(listClientsIdentifier)) {
+			/**
+			 * receives a msg like:
+			 * "/c/loggedInClientsUserNames/i/RestClientsUsernames"
+			 */
+
+			String[] arr = message.split(listClientsIdentifier + "|" + identityIdentifier);
+			String[] loggedInClients = arr[1].split(",");
+			String[] restClients = arr[2].split(",");
+
+			for (int i = 0; i < loggedInClients.length; i++) {
+				mainChatWindow.updateList(loggedInClients[i], true);
+			}
+			for (int i = 0; i < restClients.length; i++) {
+				mainChatWindow.updateList(restClients[i], false);
+			}
 		}
 	}
 
@@ -183,14 +200,9 @@ public class Client {
 
 	private void processRegisterAck(String message, InetAddress serverIP, int serverPort) {
 		/**
-		 * receives a message like:
-		 * "clientUserName/i/groupID/i/client1UserName,client2UserName...,"
+		 * receives a message like: "clientUserName"
 		 */
-
-		String[] arr = message.split(identityIdentifier);
-		setUserName(arr[0]);
-		int broadcastGroupID = Integer.parseInt(arr[1]);
-		String[] registeredClients = arr[2].split(",");
+		setUserName(message);
 
 		Properties properties = new Properties();
 		properties.setProperty("username", userName);
@@ -212,9 +224,6 @@ public class Client {
 		String msg = "Successfully REGISTERED with to server" + serverIP + ":" + serverPort + " with user name: "
 				+ userName;
 		mainChatWindow.process(msg);
-		mainChatWindow.updateList(registeredClients, broadcastGroupID);
-		mainChatWindow.removeFromList(userName);
-		mainChatWindow.updateList(userName + "**");
 	}
 
 	private void startClient() {

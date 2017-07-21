@@ -12,12 +12,21 @@ import java.util.ResourceBundle;
 public class Test {
 	public static void main(String[] args) {
 
-		String name = "/r/clientUserName/i/groupID";
-		String[] arr = name.split("/r/|/i/");
-		System.out.println(arr.length);
-		for (int i = 0; i < arr.length; i++) {
-			System.out.println(arr[i]);
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				System.out.println(i + " " + j);
+				if (j == 2) {
+					break;
+				}
+			}
 		}
+		
+//		String name = "/r/clientUserName/i/groupID";
+//		String[] arr = name.split("/r/|/i/");
+//		System.out.println(arr.length);
+//		for (int i = 0; i < arr.length; i++) {
+//			System.out.println(arr[i]);
+//		}
 
 		// Properties properties = new Properties();
 		// properties.setProperty("uname", "Anmol");

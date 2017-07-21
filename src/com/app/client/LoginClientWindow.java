@@ -1,5 +1,7 @@
 package com.app.client;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -13,18 +15,22 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import com.app.client.chatWindowGUI.MainChatWindow;
 
 import java.awt.Font;
+import java.awt.Point;
 
 public class LoginClientWindow extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField textFieldUserName;
 	private JPasswordField textFieldPassword;
+
+	private RegisterClientWindow registerClientWindow = null;
 
 	public LoginClientWindow() {
 		try {
@@ -54,7 +60,7 @@ public class LoginClientWindow extends JFrame {
 		getContentPane().add(btnRegister);
 
 		JLabel lblUserName = new JLabel("User name");
-		lblUserName.setBounds(20, 60, 90, 25);
+		lblUserName.setBounds(20, 60, 75, 25);
 		getContentPane().add(lblUserName);
 
 		textFieldUserName = new JTextField();
@@ -87,6 +93,9 @@ public class LoginClientWindow extends JFrame {
 					 * ); }
 					 */
 					new Client().loginClient(userName, password);
+					if (registerClientWindow != null) {
+						registerClientWindow.dispose();
+					}
 					dispose();
 				}
 			}
@@ -98,7 +107,7 @@ public class LoginClientWindow extends JFrame {
 
 	private void createRegisterClientWindow() {
 		this.setVisible(false);
-		new RegisterClientWindow(this);
+		registerClientWindow = new RegisterClientWindow(this);
 	}
 
 	/*
