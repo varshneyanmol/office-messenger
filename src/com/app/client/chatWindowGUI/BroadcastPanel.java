@@ -5,16 +5,19 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import com.app.client.Client;
+
 public class BroadcastPanel {
+	private Client client;
 	private JPanel panel;
 
 	private RegisteredClientsList registeredClientslist;
 
-	public BroadcastPanel() {
+	public BroadcastPanel(Client client) {
+		this.client = client;
 		panel = new JPanel();
 		createLayout();
 	}
@@ -35,6 +38,7 @@ public class BroadcastPanel {
 		panel.add(lblBroadcastUsersList, gbc_lblBroadcastUsersList);
 
 		registeredClientslist = new RegisteredClientsList();
+		registeredClientslist.getList().addMouseListener(new RegisteredClientsListEventHandler(client));
 
 		JScrollPane listScroll = new JScrollPane(registeredClientslist.getList());
 		GridBagConstraints gbc_list = new GridBagConstraints();

@@ -15,7 +15,7 @@ public class RegisteredClientsList {
 		registeredUsersModel = new DefaultListModel<ListEntryItem>();
 		registeredUsersList = new JList<ListEntryItem>(registeredUsersModel);
 		registeredUsersList.setCellRenderer(new ListRenderer());
-
+		registeredUsersList.setFixedCellHeight(25);
 	}
 
 	public void addClient(String clientUserName, boolean isOnline) {

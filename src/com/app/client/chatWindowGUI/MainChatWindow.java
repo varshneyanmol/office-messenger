@@ -3,6 +3,10 @@ package com.app.client.chatWindowGUI;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -17,14 +21,12 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import com.app.client.Client;
-import com.app.client.group.Group;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.ActionEvent;
+import com.app.client.chat.Broadcast;
+import com.app.client.chat.Chat;
+import com.app.client.chat.Group;
+import com.app.client.chat.PrivateChat;
 
 public class MainChatWindow extends JFrame {
-	private final int BROADCAST_GROUP_ID = 0;
 	private static final long serialVersionUID = 1L;
 
 	private JPanel contentPane;
@@ -32,12 +34,13 @@ public class MainChatWindow extends JFrame {
 
 	private JTabbedPane chatAreaPane;
 	private JTabbedPane optionsAreaPane;
-	private ChatPanel broadcastChat;
+	private Broadcast broadcast;
 
 	private BroadcastPanel broadcastPanel;
 	private GroupsPanel groupsPanel;
 
 	private ArrayList<Group> groups;
+	private ArrayList<PrivateChat> privateChats;
 
 	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
 	private String broadcastIdentifier = config.getString("broadcast-identifier");
@@ -109,30 +112,30 @@ public class MainChatWindow extends JFrame {
 		optionsAreaPane = new JTabbedPane();
 		chatAreaPane = new JTabbedPane();
 
-		broadcastPanel = new BroadcastPanel();
-		groupsPanel = new GroupsPanel();
+		broadcastPanel = new BroadcastPanel(client);
+		groupsPanel = new GroupsPanel(client);
 
 		optionsAreaPane.add("Broadcast", broadcastPanel.getPanel());
 		optionsAreaPane.add("Groups", groupsPanel.getPanel());
 
-		broadcastChat = new ChatPanel(client);
+		broadcast = Broadcast.getBroadcast(client);
 		ArrayList<Integer> group1Members = new ArrayList<Integer>();
 		group1Members.add(111);
 		group1Members.add(222);
 		group1Members.add(333);
-		Group group1 = new Group("Funky", group1Members, client);
+		Group group1 = new Group("Group 1", group1Members, client);
 
 		ArrayList<Integer> group2Members = new ArrayList<Integer>();
 		group1Members.add(111);
 		group1Members.add(222);
 		group1Members.add(555);
-		Group group2 = new Group("hellalalala", group2Members, client);
+		Group group2 = new Group("Group 2", group2Members, client);
 
-		JPanel broadcastChatPanel = broadcastChat.getPanel();
+		privateChats = new ArrayList<PrivateChat>();
 
-		addPanel("Broadcast", broadcastChatPanel);
-		addPanel(group1.getName(), group1.chatPanel());
-		addPanel(group2.getName(), group2.chatPanel());
+		addPanel(broadcast.getNAME(), broadcast.getPanel());
+		addPanel(group1.getName(), group1.getPanel());
+		addPanel(group2.getName(), group2.getPanel());
 
 		splitPane.setLeftComponent(optionsAreaPane);
 		splitPane.setRightComponent(chatAreaPane);
@@ -165,12 +168,12 @@ public class MainChatWindow extends JFrame {
 		 */
 		if (message.startsWith(broadcastIdentifier)) {
 			message = message.substring(broadcastIdentifier.length(), message.length());
-			broadcastChat.styleBroadcastMessage(message);
+			broadcast.getChatPanel().styleBroadcastMessage(message);
 
 		} else if (message.startsWith(groupIdentifier)) {
 
 		} else {
-			broadcastChat.console(message, null, true);
+			broadcast.getChatPanel().console(message, null, true);
 		}
 	}
 
@@ -179,7 +182,7 @@ public class MainChatWindow extends JFrame {
 	}
 
 	public void updateList(String client, boolean isOnline, int groupID) {
-		if (groupID == BROADCAST_GROUP_ID) {
+		if (groupID == broadcast.getBROADCAST_ID()) {
 			broadcastPanel.updateClient(client, isOnline);
 		}
 	}
@@ -195,5 +198,33 @@ public class MainChatWindow extends JFrame {
 	public void logoutAllFromLists() {
 		// clear the list of all the groups -> pending
 		broadcastPanel.logoutAllFromLists();
+	}
+
+	public void addPrivateChat(String receiverID, String receiverUserName) {
+		PrivateChat privateChat = new PrivateChat(receiverID, receiverUserName, client);
+		privateChats.add(privateChat);
+		addPanel(privateChat.getReceiverUserName(), privateChat.getPanel());
+	}
+
+	public void processPrivateChatMessage(String senderID, String message) {
+		PrivateChat privateChat = getPrivateChatByReceiverID(senderID);
+		if (privateChat == null) {
+			return;
+		}
+		message = privateChat.getReceiverUserName() + ": " + message;
+		privateChat.getChatPanel().styleBroadcastMessage(message);
+	}
+
+	private PrivateChat getPrivateChatByReceiverID(String receiverID) {
+		PrivateChat privateChat = null;
+
+		for (int i = 0; i < privateChats.size(); i++) {
+			if (privateChats.get(i).getReceiverID().equals(receiverID)) {
+				privateChat = privateChats.get(i);
+				break;
+			}
+		}
+
+		return privateChat;
 	}
 }

@@ -54,6 +54,19 @@ public class ServerDao {
 		return client;
 	}
 
+	public static RegisteredClient fetchClientByUserName(String userName) {
+		RegisteredClient client = null;
+
+		Session session = HibernateUtil.openSession();
+		Criteria criteria = session.createCriteria(RegisteredClient.class);
+		Criterion idCriterion = Restrictions.eq("userName", userName);
+		criteria.add(idCriterion);
+		client = (RegisteredClient) criteria.uniqueResult();
+		session.close();
+
+		return client;
+	}
+
 	public static ArrayList<RegisteredClient> fetchAllClients() {
 		ArrayList<RegisteredClient> list = new ArrayList<RegisteredClient>();
 		Session session = HibernateUtil.openSession();

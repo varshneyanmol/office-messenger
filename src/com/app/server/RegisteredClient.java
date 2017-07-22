@@ -1,7 +1,5 @@
 package com.app.server;
 
-import java.net.InetAddress;
-
 public class RegisteredClient {
 	private String id;
 	private String name;

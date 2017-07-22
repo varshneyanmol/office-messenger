@@ -23,8 +23,12 @@ public class Server implements Runnable {
 	private String loginIdentifier = config.getString("login-identifier");
 	private String logoutIdentifier = config.getString("logout-identifier");
 	private String identityIdentifier = config.getString("identity-identifier");
+	private String ackIdentifier = config.getString("ack-identifier");
 	private String broadcastIdentifier = config.getString("broadcast-identifier");
 	private String groupIdentifier = config.getString("group-identifier");
+	private String privateChatIdentifier = config.getString("private-chat-identifier");
+	private String privatemessageIdentifier = config.getString("private-message-identifier");
+	private String chatFormIdentifier = config.getString("chat-form-identifier");
 	private String errorIdentifier = config.getString("error-identifier");
 	private String updateListIdentifier = config.getString("update-list-identifier");
 	private String listClientsIdentifier = config.getString("list-clients-identifier");
@@ -105,8 +109,82 @@ public class Server implements Runnable {
 			 */
 			message = message.substring(logoutIdentifier.length(), message.length());
 			processLogoutMessage(message);
+
+		} else if (message.startsWith(privateChatIdentifier)) {
+			/**
+			 * receives a msg like: "/p/message"
+			 */
+			message = message.substring(privateChatIdentifier.length(), message.length());
+			processPrivateChatMessage(message);
 		}
 
+	}
+
+	private void processPrivateChatMessage(String message) {
+		if (message.startsWith(privatemessageIdentifier)) {
+			/**
+			 * receives a msg like: "/m/senderID/i/receiverID/i/message"
+			 */
+			String[] arr = message.split(privatemessageIdentifier + "|" + identityIdentifier);
+			String senderID = arr[1];
+			String receiverID = arr[2];
+			message = arr[3];
+			LoggedInClient receiver = getLoggedInClient(receiverID);
+			if (receiver != null) {
+				/**
+				 * sends a msg like: "/p//m/senderID/i/message"
+				 */
+				message = privateChatIdentifier + privatemessageIdentifier + senderID + identityIdentifier + message;
+				serverNetworking.send(message.getBytes(), receiver.getIp(), receiver.getPort());
+
+			} else {
+				// receiver is not logged in -> pending
+			}
+
+		} else if (message.startsWith(chatFormIdentifier)) {
+			/**
+			 * receives a msg like: "/f/senderClientID/i/receiverClientUserName"
+			 */
+			String[] arr = message.split(chatFormIdentifier + "|" + identityIdentifier);
+
+			String senderClientID = arr[1];
+			LoggedInClient sender = getLoggedInClient(senderClientID);
+			if (sender == null) {
+				return;
+			}
+			String receiverClientUserName = arr[2];
+			RegisteredClient receiver = getClientByUserName(receiverClientUserName);
+			String receiverID = receiver.getId();
+
+			for (int i = 0; i < loggedInClients.size(); i++) {
+				LoggedInClient c = loggedInClients.get(i);
+				if (c.getClient().getId().equals(receiverID)) {
+					// client is logged in
+					/**
+					 * sends a msg to the receiver like:
+					 * "/p//f/senderClientID/i/senderClientUserName" AND sends a
+					 * ack to the sender like:
+					 * "/p//a/receiverID/i/receiverUserName"
+					 */
+					String messageToReceiver = privateChatIdentifier + chatFormIdentifier + senderClientID
+							+ identityIdentifier + sender.getClient().getUserName();
+					String messageToSender = privateChatIdentifier + ackIdentifier + receiverID + identityIdentifier
+							+ receiverClientUserName;
+					serverNetworking.send(messageToReceiver.getBytes(), c.getIp(), c.getPort());
+					serverNetworking.send(messageToSender.getBytes(), sender.getIp(), sender.getPort());
+					break;
+				} else {
+					// client is not logged in -> pending
+				}
+			}
+
+		}
+	}
+
+	private RegisteredClient getClientByUserName(String receiverClientUserName) {
+		RegisteredClient client = null;
+		client = ServerDao.fetchClientByUserName(receiverClientUserName);
+		return client;
 	}
 
 	private void processLogoutMessage(String clientID) {

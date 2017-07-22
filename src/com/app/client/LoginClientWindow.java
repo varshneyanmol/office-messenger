@@ -64,6 +64,7 @@ public class LoginClientWindow extends JFrame {
 		getContentPane().add(lblUserName);
 
 		textFieldUserName = new JTextField();
+		textFieldUserName.setText("anmol_e1");
 		textFieldUserName.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		textFieldUserName.setBounds(130, 60, 160, 25);
 		getContentPane().add(textFieldUserName);
@@ -76,6 +77,7 @@ public class LoginClientWindow extends JFrame {
 		getContentPane().add(lblPassword);
 
 		textFieldPassword = new JPasswordField();
+		textFieldPassword.setText("anaconda");
 		textFieldPassword.setBounds(130, 120, 160, 25);
 		getContentPane().add(textFieldPassword);
 		textFieldPassword.setColumns(10);

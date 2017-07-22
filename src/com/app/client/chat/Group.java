@@ -1,24 +1,23 @@
-package com.app.client.group;
+package com.app.client.chat;
 
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
 import com.app.client.Client;
+import com.app.client.chat.Chat;
 import com.app.client.chatWindowGUI.ChatPanel;
 
-public class Group {
-	private Client client;
+public class Group extends Chat {
 	private int id;
 	private String name;
 	private ArrayList<Integer> members;
-	private JPanel panel;
 
 	public Group(String name, ArrayList<Integer> members, Client client) {
+		super(client);
+		createChatPanel(this);
 		this.name = name;
 		this.members = members;
-		this.client = client;
-		panel = new ChatPanel(client).getPanel();
 	}
 
 	public int getId() {
@@ -33,7 +32,4 @@ public class Group {
 		return members;
 	}
 
-	public JPanel chatPanel() {
-		return panel;
-	}
 }

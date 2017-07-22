@@ -23,7 +23,6 @@ public class ListRenderer extends DefaultListCellRenderer implements ListCellRen
 			setBackground(list.getBackground());
 			setForeground(list.getForeground());
 		}
-
 		setEnabled(true);
 		setFont(list.getFont());
 		return this;

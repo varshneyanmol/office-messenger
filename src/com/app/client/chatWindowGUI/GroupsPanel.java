@@ -9,10 +9,14 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import com.app.client.Client;
+
 public class GroupsPanel {
+	private Client client;
 	private JPanel panel;
 
-	public GroupsPanel() {
+	public GroupsPanel(Client client) {
+		this.client = client;
 		panel = new JPanel();
 		createLayout();
 	}

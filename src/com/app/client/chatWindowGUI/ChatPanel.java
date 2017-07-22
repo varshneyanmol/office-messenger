@@ -5,10 +5,13 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -25,9 +28,12 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import com.app.client.Client;
+import com.app.client.chat.Chat;
+import com.app.client.chat.PrivateChat;
 
 public class ChatPanel {
 	private Client client;
+	private Chat chat = null;
 	private JPanel panel;
 
 	private JTextPane chatHistory;
@@ -40,6 +46,13 @@ public class ChatPanel {
 
 	public ChatPanel(Client client) {
 		this.client = client;
+		panel = new JPanel();
+		createLayout();
+	}
+
+	public ChatPanel(Client client, Chat chat) {
+		this.client = client;
+		this.chat = chat;
 		panel = new JPanel();
 		createLayout();
 	}
@@ -92,12 +105,24 @@ public class ChatPanel {
 
 		JButton btnSend = new JButton();
 		btnSend.setIcon(new ImageIcon("src/com/app/client/resources/icons/send.png"));
-		// btnSend.setBorder(null);
 		btnSend.setBorder(BorderFactory.createEmptyBorder());
 		btnSend.setContentAreaFilled(false);
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				sendMessage(messageField.getText());
+			}
+		});
+		btnSend.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				Point point = btnSend.getLocation();
+				btnSend.setLocation(new Point(point.x + 4, point.y));
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				Point point = btnSend.getLocation();
+				btnSend.setLocation(new Point(point.x - 4, point.y));
 			}
 		});
 		GridBagConstraints gbc_btnSend = new GridBagConstraints();
@@ -117,11 +142,22 @@ public class ChatPanel {
 	private void sendMessage(String message) {
 		messageField.setText("");
 		message = message.trim();
-		if (!message.equals("")) {
-			if (client.getId() != null) {
-				message = broadcastIdentifier + client.getId() + identityIdentifier + message;
-				client.send(message);
+		if (message.equals("")) {
+			return;
+		}
+		if (chat != null) {
+			if (chat instanceof PrivateChat) {
+				/**
+				 * In case of private chat, We print message to the chat panel
+				 * before sending to the server because server sends the message
+				 * only to the receiver. But in case of broadcast or group chat,
+				 * we just send the message to the server and then server sends
+				 * the message to everybody in the group including the client
+				 * which has sent the message.
+				 */
+				styleBroadcastMessage(client.getUserName() + ": " + message);
 			}
+			client.sendMessage(message, chat);
 		}
 	}
 
@@ -160,4 +196,7 @@ public class ChatPanel {
 		chatHistory.setCaretPosition(doc.getLength());
 	}
 
+	public JTextPane getChatHistory() {
+		return chatHistory;
+	}
 }

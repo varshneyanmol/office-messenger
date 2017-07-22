@@ -11,6 +11,10 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 
 import com.app.client.chatWindowGUI.MainChatWindow;
+import com.app.client.chat.Broadcast;
+import com.app.client.chat.Chat;
+import com.app.client.chat.Group;
+import com.app.client.chat.PrivateChat;
 
 public class Client {
 	private boolean running = false;
@@ -21,16 +25,22 @@ public class Client {
 	private InetAddress serverIP;
 	private int serverPort;
 	private ClientNetworking clientNetworking;
+	private PrivateChat privateChat;
+	private Group group;
 
 	private final int BROADCAST_GROUP_ID = 0;
 
 	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
 	private String registerIdentifier = config.getString("register-identifier");
 	private String loginIdentifier = config.getString("login-identifier");
+	private String ackIdentifier = config.getString("ack-identifier");
 	private String logoutIdentifier = config.getString("logout-identifier");
 	private String identityIdentifier = config.getString("identity-identifier");
 	private String broadcastIdentifier = config.getString("broadcast-identifier");
 	private String groupIdentifier = config.getString("group-identifier");
+	private String privateChatIdentifier = config.getString("private-chat-identifier");
+	private String privateMessageIdentifier = config.getString("private-message-identifier");
+	private String chatFormIdentifier = config.getString("chat-form-identifier");
 	private String errorIdentifier = config.getString("error-identifier");
 	private String updateListIdentifier = config.getString("update-list-identifier");
 	private String listClientsIdentifier = config.getString("list-clients-identifier");
@@ -69,7 +79,8 @@ public class Client {
 	public boolean loginClient(String userName, String password) {
 		boolean result = false;
 		String bundleName = "ClientServer_" + userName;
-		ResourceBundle clientServerBundle = ResourceBundle.getBundle("com.app.client." + bundleName);
+		ResourceBundle clientServerBundle = ResourceBundle
+				.getBundle("com.app.client.resources.serverInfo." + bundleName);
 		try {
 			this.serverIP = InetAddress.getByName(clientServerBundle.getString("serverIP"));
 			this.serverPort = Integer.parseInt(clientServerBundle.getString("serverPort"));
@@ -136,7 +147,46 @@ public class Client {
 			 */
 			processLogoutMessage();
 
+		} else if (message.startsWith(privateChatIdentifier)) {
+			/**
+			 * receives a msg like: "/p/messsage"
+			 */
+			message = message.substring(updateListIdentifier.length(), message.length());
+			processPrivateChatMessage(message);
+
 		} else if (message.startsWith(errorIdentifier)) {
+
+		}
+	}
+
+	private void processPrivateChatMessage(String message) {
+		if (message.startsWith(privateMessageIdentifier)) {
+			/**
+			 * receives a msg like: "/m/senderID/i/message"
+			 */
+			String[] arr = message.split(privateMessageIdentifier + "|" + identityIdentifier);
+			String senderID = arr[1];
+			message = arr[2];
+			mainChatWindow.processPrivateChatMessage(senderID, message);
+
+		} else if (message.startsWith(chatFormIdentifier)) {
+			/**
+			 * receives a msg like: "/f/senderID/i/senderUsername"
+			 */
+			String[] arr = message.split(chatFormIdentifier + "|" + identityIdentifier);
+			mainChatWindow.addPrivateChat(arr[1], arr[2]);
+
+		} else if (message.startsWith(ackIdentifier)) {
+			/**
+			 * receives a ack like: "/a/receiverID/i/receiverUserName"
+			 */
+			String[] arr = message.split(ackIdentifier + "|" + identityIdentifier);
+			mainChatWindow.addPrivateChat(arr[1], arr[2]);
+
+		} else if (message.startsWith(privateMessageIdentifier)) {
+			/**
+			 * receives a msg like: "/m/senderID/i/receiverID/i/message"
+			 */
 
 		}
 	}
@@ -211,7 +261,8 @@ public class Client {
 
 		String fileName = "ClientServer_" + userName;
 		try {
-			OutputStream outputStream = new FileOutputStream("src/com/app/client/" + fileName + ".properties");
+			OutputStream outputStream = new FileOutputStream(
+					"src/com/app/client/resources/serverInfo/" + fileName + ".properties");
 			String comment = "This file contains the username, IP and port of the client so that client can login to the server next time without having to enter the server IP and server Port again.";
 			properties.store(outputStream, comment);
 
@@ -250,4 +301,38 @@ public class Client {
 	public void send(String message) {
 		clientNetworking.send(message.getBytes());
 	}
+
+	public void startChat(String receiverUserName) {
+		/**
+		 * sends a msg like: "/p//f/senderClientID/i/receiverClientUserName"
+		 */
+		String msg = privateChatIdentifier + chatFormIdentifier + this.id + identityIdentifier + receiverUserName;
+		clientNetworking.send(msg.getBytes());
+	}
+
+	public void sendMessage(String message, Chat chat) {
+		System.out.println("IN SEND MESSAGE");
+		if (chat instanceof PrivateChat) {
+			privateChat = (PrivateChat) chat;
+			/**
+			 * sends a msg like: "/p//m/senderID/i/receiverID/i/message"
+			 */
+			message = privateChatIdentifier + privateMessageIdentifier + this.id + identityIdentifier
+					+ privateChat.getReceiverID() + identityIdentifier + message;
+
+		} else if (chat instanceof Group) {
+			group = (Group) chat;
+
+		} else if (chat instanceof Broadcast) {
+			/**
+			 * sends a msg like: "/b/clientID/i/message"
+			 */
+			message = broadcastIdentifier + this.id + identityIdentifier + message;
+			System.out.println("Broadcasting message: " + message);
+		}
+
+		clientNetworking.send(message.getBytes());
+
+	}
+
 }
