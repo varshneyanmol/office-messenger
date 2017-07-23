@@ -183,10 +183,7 @@ public class Client {
 			String[] arr = message.split(ackIdentifier + "|" + identityIdentifier);
 			mainChatWindow.addPrivateChat(arr[1], arr[2]);
 
-		} else if (message.startsWith(privateMessageIdentifier)) {
-			/**
-			 * receives a msg like: "/m/senderID/i/receiverID/i/message"
-			 */
+		} else if (message.startsWith("")) {
 
 		}
 	}

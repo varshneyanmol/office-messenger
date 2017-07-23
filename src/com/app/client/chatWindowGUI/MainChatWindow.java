@@ -46,6 +46,7 @@ public class MainChatWindow extends JFrame {
 	private String broadcastIdentifier = config.getString("broadcast-identifier");
 	private String groupIdentifier = config.getString("group-identifier");
 	private String logoutIdentifier = config.getString("logout-identifier");
+	private String identityIdentifier = config.getString("identity-identifier");
 
 	public MainChatWindow(Client client) {
 		this.client = client;
@@ -163,17 +164,18 @@ public class MainChatWindow extends JFrame {
 
 	public void process(String message) {
 		/**
-		 * receives a message like: "/b/message" OR
+		 * receives a message like: "/b/clientUserName/i/message" OR
 		 * "/g//b/groupID/i/clientUserName/i/message"
 		 */
 		if (message.startsWith(broadcastIdentifier)) {
 			message = message.substring(broadcastIdentifier.length(), message.length());
-			broadcast.getChatPanel().styleBroadcastMessage(message);
+			String[] arr = message.split(identityIdentifier);
+			broadcast.getChatPanel().console(arr[1], arr[0]);
 
 		} else if (message.startsWith(groupIdentifier)) {
 
 		} else {
-			broadcast.getChatPanel().console(message, null, true);
+			broadcast.getChatPanel().console(message, null);
 		}
 	}
 
@@ -211,8 +213,8 @@ public class MainChatWindow extends JFrame {
 		if (privateChat == null) {
 			return;
 		}
-		message = privateChat.getReceiverUserName() + ": " + message;
-		privateChat.getChatPanel().styleBroadcastMessage(message);
+		// message = privateChat.getReceiverUserName() + ": " + message;
+		privateChat.getChatPanel().console(message, privateChat.getReceiverUserName());
 	}
 
 	private PrivateChat getPrivateChatByReceiverID(String receiverID) {

@@ -14,8 +14,9 @@ public class Broadcast extends Chat {
 	private Broadcast(Client client) {
 		super(client);
 		createChatPanel(this);
-		getChatPanel().getChatHistory().setBackground(new Color(148, 155, 168));
-		getChatPanel().getChatHistory().setForeground(Color.WHITE);
+		// getChatPanel().getChatHistory().setBackground(new Color(148, 155,
+		// 168));
+		// getChatPanel().getChatHistory().setForeground(Color.WHITE);
 	}
 
 	public static Broadcast getBroadcast(Client client) {

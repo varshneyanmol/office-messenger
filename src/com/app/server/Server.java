@@ -224,7 +224,7 @@ public class Server implements Runnable {
 
 	private void prepareBroadcastMessage(String message) {
 		/**
-		 * prepares a msg like: "/b/clientUserName: message"
+		 * prepares a msg like: "/b/clientUserName/i/message"
 		 */
 		message = message.substring(broadcastIdentifier.length(), message.length());
 		String[] arr = message.split(identityIdentifier);
@@ -234,7 +234,7 @@ public class Server implements Runnable {
 		for (int i = 0; i < loggedInClients.size(); i++) {
 			LoggedInClient c = loggedInClients.get(i);
 			if (c.getClient().getId().equals(clientID)) {
-				message = c.getClient().getUserName() + ": " + message;
+				message = c.getClient().getUserName() + identityIdentifier + message;
 				break;
 			}
 		}
