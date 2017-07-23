@@ -10,6 +10,8 @@ import java.net.UnknownHostException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
+import javax.swing.JTextArea;
+
 import com.app.client.chatWindowGUI.MainChatWindow;
 import com.app.client.chat.Broadcast;
 import com.app.client.chat.Chat;
@@ -115,7 +117,7 @@ public class Client {
 
 	private void process(DatagramPacket packet) {
 		String message = new String(packet.getData()).trim();
-		System.out.println(message);
+		System.out.println("RECEIVED: " + message);
 
 		if (message.startsWith(broadcastIdentifier)) {
 			mainChatWindow.process(message);
@@ -156,6 +158,35 @@ public class Client {
 
 		} else if (message.startsWith(errorIdentifier)) {
 
+		} else if (message.startsWith(groupIdentifier)) {
+			/**
+			 * receives a msg like: "/g/message"
+			 */
+			message = message.substring(groupIdentifier.length(), message.length());
+			processGroupMessage(message);
+
+		}
+	}
+
+	private void processGroupMessage(String message) {
+		if (message.startsWith(chatFormIdentifier)) {
+			/**
+			 * receives a msg to all members like:
+			 * "/f/groupID/i/groupName/i/createrUserName/i/membersUserNames"
+			 */
+			String[] arr = message.split(chatFormIdentifier + "|" + identityIdentifier);
+			int groupID = Integer.parseInt(arr[1]);
+			String groupName = arr[2];
+			String creatorUserName = arr[3];
+			String[] members = arr[4].split(",");
+			mainChatWindow.addGroup(groupID, groupName, creatorUserName, members);
+
+		} else if (message.startsWith(privateMessageIdentifier)) {
+			/**
+			 * receives a msg like: "/m/groupID/i/senderUserName/i/message"
+			 */
+			String[] arr = message.split(privateMessageIdentifier + "|" + identityIdentifier);
+			mainChatWindow.processGroupMessage(Integer.parseInt(arr[1]), arr[2], arr[3]);
 		}
 	}
 
@@ -242,7 +273,7 @@ public class Client {
 		setUserName(arr[0]);
 		setId(arr[1]);
 		mainChatWindow = new MainChatWindow(this);
-		mainChatWindow.process("Successfully logged in");
+		// mainChatWindow.process("Successfully logged in");
 	}
 
 	private void processRegisterAck(String message, InetAddress serverIP, int serverPort) {
@@ -308,7 +339,6 @@ public class Client {
 	}
 
 	public void sendMessage(String message, Chat chat) {
-		System.out.println("IN SEND MESSAGE");
 		if (chat instanceof PrivateChat) {
 			privateChat = (PrivateChat) chat;
 			/**
@@ -319,7 +349,13 @@ public class Client {
 
 		} else if (chat instanceof Group) {
 			group = (Group) chat;
+			/**
+			 * sends a msg like: "/g//m/groupID/i/senderID/i/message"
+			 */
+			message = groupIdentifier + privateMessageIdentifier + group.getId() + identityIdentifier + this.id
+					+ identityIdentifier + message;
 
+			System.out.println("MESSAGE GROUP: " + message);
 		} else if (chat instanceof Broadcast) {
 			/**
 			 * sends a msg like: "/b/clientID/i/message"

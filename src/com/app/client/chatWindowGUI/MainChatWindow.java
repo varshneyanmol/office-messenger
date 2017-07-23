@@ -1,28 +1,38 @@
 package com.app.client.chatWindowGUI;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
 import com.app.client.Client;
 import com.app.client.chat.Broadcast;
-import com.app.client.chat.Chat;
 import com.app.client.chat.Group;
 import com.app.client.chat.PrivateChat;
 
@@ -32,6 +42,7 @@ public class MainChatWindow extends JFrame {
 	private JPanel contentPane;
 	private Client client;
 
+	private JSplitPane splitPane;
 	private JTabbedPane chatAreaPane;
 	private JTabbedPane optionsAreaPane;
 	private Broadcast broadcast;
@@ -47,6 +58,7 @@ public class MainChatWindow extends JFrame {
 	private String groupIdentifier = config.getString("group-identifier");
 	private String logoutIdentifier = config.getString("logout-identifier");
 	private String identityIdentifier = config.getString("identity-identifier");
+	private String chatFormIdentifier = config.getString("chat-form-identifier");
 
 	public MainChatWindow(Client client) {
 		this.client = client;
@@ -78,6 +90,13 @@ public class MainChatWindow extends JFrame {
 			}
 		});
 		mnFile.add(exit);
+		JMenuItem formGroup = new JMenuItem("Form new group");
+		formGroup.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				fromGroup();
+			}
+		});
+		mnFile.add(formGroup);
 
 		JMenu mnSettings = new JMenu("Settings");
 		menuBar.add(mnSettings);
@@ -100,7 +119,7 @@ public class MainChatWindow extends JFrame {
 		gbl_contentPane.rowWeights = new double[] { 1.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setContinuousLayout(true);
 		GridBagConstraints gbc_splitPane = new GridBagConstraints();
 		gbc_splitPane.fill = GridBagConstraints.BOTH;
@@ -112,6 +131,7 @@ public class MainChatWindow extends JFrame {
 
 		optionsAreaPane = new JTabbedPane();
 		chatAreaPane = new JTabbedPane();
+		chatAreaPane.setBackground(Color.BLUE);
 
 		broadcastPanel = new BroadcastPanel(client);
 		groupsPanel = new GroupsPanel(client);
@@ -120,24 +140,8 @@ public class MainChatWindow extends JFrame {
 		optionsAreaPane.add("Groups", groupsPanel.getPanel());
 
 		broadcast = Broadcast.getBroadcast(client);
-		ArrayList<Integer> group1Members = new ArrayList<Integer>();
-		group1Members.add(111);
-		group1Members.add(222);
-		group1Members.add(333);
-		Group group1 = new Group("Group 1", group1Members, client);
-
-		ArrayList<Integer> group2Members = new ArrayList<Integer>();
-		group1Members.add(111);
-		group1Members.add(222);
-		group1Members.add(555);
-		Group group2 = new Group("Group 2", group2Members, client);
-
 		privateChats = new ArrayList<PrivateChat>();
-
 		addPanel(broadcast.getNAME(), broadcast.getPanel());
-		addPanel(group1.getName(), group1.getPanel());
-		addPanel(group2.getName(), group2.getPanel());
-
 		splitPane.setLeftComponent(optionsAreaPane);
 		splitPane.setRightComponent(chatAreaPane);
 
@@ -152,6 +156,54 @@ public class MainChatWindow extends JFrame {
 
 	public Client getClient() {
 		return client;
+	}
+
+	private void fromGroup() {
+		showGroupFormDialog();
+	}
+
+	private void showGroupFormDialog() {
+		JDialog formGroupDialog = new JDialog(this, "Form new group", true);
+
+		JButton btnOk = new JButton("Form");
+		JLabel lblDialog = new JLabel("Group Name");
+		JTextField txtName = new JTextField();
+
+		btnOk.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String groupName = txtName.getText();
+				if (!groupName.equals("")) {
+
+					/**
+					 * returns a string like:
+					 * "client1Username,client1Username,....,"
+					 */
+					String members = broadcastPanel.getSelectedValues();
+					if (!members.equals("")) {
+						/**
+						 * sends a msg like:
+						 * "/g//f/groupName/i/clientID/i/member1UserName,member2UserName,..,"
+						 */
+						if (client.getId() != null) { // condition of logged out
+														// client
+							String message = groupIdentifier + chatFormIdentifier + groupName + identityIdentifier
+									+ client.getId() + identityIdentifier + members;
+							client.send(message);
+						}
+					}
+					formGroupDialog.dispose();
+				}
+			}
+		});
+
+		formGroupDialog.getContentPane().setLayout(new GridLayout(3, 1, 5, 5));
+		formGroupDialog.getContentPane().add(lblDialog);
+		formGroupDialog.getContentPane().add(txtName);
+		formGroupDialog.getContentPane().add(btnOk);
+		formGroupDialog.setSize(300, 100);
+		formGroupDialog.setLocationRelativeTo(null);
+		formGroupDialog.setVisible(true);
 	}
 
 	private void logout(Client client) {
@@ -200,6 +252,34 @@ public class MainChatWindow extends JFrame {
 	public void logoutAllFromLists() {
 		// clear the list of all the groups -> pending
 		broadcastPanel.logoutAllFromLists();
+	}
+
+	public void addGroup(int groupID, String groupName, String creatorUserName, String[] members) {
+		Group group = new Group(groupID, groupName, creatorUserName, new ArrayList<>(Arrays.asList(members)), client);
+		groups.add(group);
+		addPanel(groupName, group.getPanel());
+	}
+
+	public void processGroupMessage(int groupID, String senderUserName, String message) {
+		Group group = getGroupByID(groupID);
+		if (group == null) {
+			return;
+		}
+		// message = privateChat.getReceiverUserName() + ": " + message;
+		group.getChatPanel().console(message, senderUserName);
+	}
+
+	private Group getGroupByID(int groupID) {
+		Group group = null;
+
+		for (int i = 0; i < groups.size(); i++) {
+			if (groups.get(i).getId() == groupID) {
+				group = groups.get(i);
+				break;
+			}
+		}
+
+		return group;
 	}
 
 	public void addPrivateChat(String receiverID, String receiverUserName) {

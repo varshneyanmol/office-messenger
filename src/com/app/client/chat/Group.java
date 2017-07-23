@@ -11,10 +11,13 @@ import com.app.client.chatWindowGUI.ChatPanel;
 public class Group extends Chat {
 	private int id;
 	private String name;
-	private ArrayList<Integer> members;
+	private ArrayList<String> members;
+	private String creatorUserName;
 
-	public Group(String name, ArrayList<Integer> members, Client client) {
+	public Group(int id, String name, String creatorUserName, ArrayList<String> members, Client client) {
 		super(client);
+		this.id = id;
+		this.creatorUserName = creatorUserName;
 		createChatPanel(this);
 		this.name = name;
 		this.members = members;
@@ -28,7 +31,7 @@ public class Group extends Chat {
 		return name;
 	}
 
-	public ArrayList<Integer> getMembers() {
+	public ArrayList<String> getMembers() {
 		return members;
 	}
 

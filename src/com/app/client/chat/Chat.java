@@ -1,5 +1,7 @@
 package com.app.client.chat;
 
+import java.awt.Color;
+
 import javax.swing.JPanel;
 
 import com.app.client.Client;
@@ -17,6 +19,7 @@ public class Chat {
 	public void createChatPanel(Chat obj) {
 		this.chatPanel = new ChatPanel(client, this);
 		this.panel = this.chatPanel.getPanel();
+//		this.panel.setBackground(Color.MAGENTA);
 	}
 
 	public Client getClient() {

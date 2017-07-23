@@ -1,10 +1,9 @@
 package com.app.server;
 
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import com.app.server.hibernate.dao.ServerDao;
@@ -35,6 +34,7 @@ public class Server implements Runnable {
 
 	private ArrayList<LoggedInClient> loggedInClients = new ArrayList<LoggedInClient>();
 	private ArrayList<RegisteredClient> registeredClients;
+	private ArrayList<Group> groups = new ArrayList<Group>();
 
 	public Server(InetAddress ip, int port) {
 		this.ip = ip;
@@ -116,8 +116,115 @@ public class Server implements Runnable {
 			 */
 			message = message.substring(privateChatIdentifier.length(), message.length());
 			processPrivateChatMessage(message);
+
+		} else if (message.startsWith(groupIdentifier)) {
+			/**
+			 * receives a msg like: "/g/message"
+			 */
+			message = message.substring(groupIdentifier.length(), message.length());
+			processGroupMessage(message);
+
 		}
 
+	}
+
+	private void processGroupMessage(String message) {
+		if (message.startsWith(privatemessageIdentifier)) {
+			/**
+			 * receives a msg like: "/m/groupID/i/senderID/i/message"
+			 */
+			String[] arr = message.split(privatemessageIdentifier + "|" + identityIdentifier);
+			int groupID = Integer.parseInt(arr[1]);
+			RegisteredClient sender = ServerDao.fetchClient(arr[2]);
+			if (sender == null) {
+				return;
+			}
+			String msg = arr[3];
+			System.out.println("ARR[3]: " + msg);
+			Group group = getGroup(groupID);
+			if (group == null) {
+				return;
+			}
+			ArrayList<String> members = group.getMemberIDs();
+			for (int i = 0; i < members.size(); i++) {
+				RegisteredClient client = getClientByUserName(members.get(i));
+				if (client == null) {
+					return;
+				}
+				LoggedInClient loggedInClient = getLoggedInClient(client.getId());
+				if (loggedInClient != null) {
+					/**
+					 * sends a msg to logged in clients like:
+					 * "/g//m/groupID/i/senderUserName/i/message"
+					 */
+					msg = groupIdentifier + privatemessageIdentifier + groupID + identityIdentifier
+							+ sender.getUserName() + identityIdentifier + msg;
+					System.out.println("SENT: " + msg);
+					serverNetworking.send(msg.getBytes(), loggedInClient.getIp(), loggedInClient.getPort());
+					msg = "";
+
+				} else {
+					// client is not logged in -> pending
+				}
+			}
+
+		} else if (message.startsWith(chatFormIdentifier)) {
+			/**
+			 * receives a msg like:
+			 * "/f/groupName/i/clientID/i/member1UserName,member2UserName,..,"
+			 */
+			String[] arr = message.split(chatFormIdentifier + "|" + identityIdentifier);
+			String groupName = arr[1];
+			String groupCreaterID = arr[2];
+			String[] groupMembers = arr[3].split(",");
+			int groupID = UniqueIdentifier.getUniqueGroupIdentifier();
+			ArrayList<String> groupMembersList = new ArrayList<String>(Arrays.asList(groupMembers));
+			groups.add(new Group(groupID, groupName, groupMembersList));
+			LoggedInClient groupCreater = getLoggedInClient(groupCreaterID);
+
+			/**
+			 * sends a msg to all members like:
+			 * "/g//f/groupID/i/groupName/i/createrUserName/i/membersUserNames"
+			 */
+			String messageToMembers = groupIdentifier + chatFormIdentifier + groupID + identityIdentifier + groupName
+					+ identityIdentifier + groupCreater.getClient().getUserName() + identityIdentifier + arr[3];
+			for (int i = 0; i < groupMembersList.size(); i++) {
+				RegisteredClient client = getClientByUserName(groupMembersList.get(i));
+				if (client == null) {
+					continue;
+				}
+				LoggedInClient loggedInClient = getLoggedInClient(client.getId());
+				if (loggedInClient != null) {
+					serverNetworking.send(messageToMembers.getBytes(), loggedInClient.getIp(),
+							loggedInClient.getPort());
+				} else {
+					// client is not logged in -> pending
+				}
+			}
+		}
+	}
+
+	private Group getGroup(int groupID) {
+		Group group = null;
+
+		for (int i = 0; i < groups.size(); i++) {
+			if (groups.get(i).getId() == groupID) {
+				group = groups.get(i);
+				break;
+			}
+		}
+
+		return group;
+	}
+
+	private boolean isClientLoggedIn(String clientID) {
+		for (int i = 0; i < loggedInClients.size(); i++) {
+			LoggedInClient c = loggedInClients.get(i);
+			if (c.getClient().getId().equals(clientID)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void processPrivateChatMessage(String message) {

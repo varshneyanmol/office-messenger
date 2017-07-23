@@ -1,17 +1,23 @@
 package com.app.client.chatWindowGUI;
 
+import java.util.List;
+
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JList;
 
+import com.app.client.Client;
+
 public class RegisteredClientsList {
+	private Client client;
 	private JList<ListEntryItem> registeredUsersList;
 	private DefaultListModel<ListEntryItem> registeredUsersModel;
 
 	ImageIcon onlineClientIcon = new ImageIcon("src/com/app/client/resources/icons/onlineClient.png");
 	ImageIcon offlineClientIcon = new ImageIcon("src/com/app/client/resources/icons/offlineClient.png");
 
-	public RegisteredClientsList() {
+	public RegisteredClientsList(Client client) {
+		this.client = client;
 		registeredUsersModel = new DefaultListModel<ListEntryItem>();
 		registeredUsersList = new JList<ListEntryItem>(registeredUsersModel);
 		registeredUsersList.setCellRenderer(new ListRenderer());
@@ -94,5 +100,27 @@ public class RegisteredClientsList {
 				return;
 			}
 		}
+	}
+
+	public String getSelectedUserNames() {
+		String members = "";
+		List<ListEntryItem> selectedItems = registeredUsersList.getSelectedValuesList();
+		if (!selectedItems.isEmpty()) {
+			if (selectedItems.size() == 1 && selectedItems.get(0).getText().equals(client.getUserName())) {
+				return members;
+			}
+			boolean flag = true;
+			for (int i = 0; i < selectedItems.size(); i++) {
+				ListEntryItem item = selectedItems.get(i);
+				if (item.getText().equals(client.getUserName())) {
+					flag = false;
+				}
+				members = members + item.getText() + ",";
+			}
+			if (flag) {
+				members = client.getUserName() + "," + members;
+			}
+		}
+		return members;
 	}
 }

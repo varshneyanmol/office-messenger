@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
@@ -61,29 +62,29 @@ public class DynamicChatBox extends JFrame {
 		/**
 		 * 
 		 */
-		JTextArea server = new JTextArea();
-		GridBagConstraints gbc_server = new GridBagConstraints();
-		gbc_server.insets = new Insets(10, 0, 10, 0);
-		gbc_server.fill = GridBagConstraints.HORIZONTAL;
-		gbc_server.anchor = GridBagConstraints.EAST;
-		gbc_server.gridx = 1;
-		server.setLineWrap(true);
-		server.setEditable(false);
-		server.setOpaque(true);
-		server.setWrapStyleWord(true);
-		// server.setPreferredSize(new Dimension(200, 100));
-		// server.setText(
-		// "Registered with Server /127.0.0.1:7890 with user name 'anmol_e1'.
-		server.setText("SERVER");
-		// You can now use our services.");
-		server.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-		server.setBackground(new Color(196, 55, 37));
-		server.setForeground(Color.WHITE);
-		// server.setFont(server.getFont().deriveFont(Font.BOLD));
-		server.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-		gbc_server.gridwidth = 3;
-		// gbc_button3.gridy = 0;
-		chatPanel.add(server, gbc_server);
+		// JTextArea server = new JTextArea();
+		// GridBagConstraints gbc_server = new GridBagConstraints();
+		// gbc_server.insets = new Insets(10, 0, 10, 0);
+		// gbc_server.fill = GridBagConstraints.HORIZONTAL;
+		// gbc_server.anchor = GridBagConstraints.EAST;
+		// gbc_server.gridx = 1;
+		// server.setLineWrap(true);
+		// server.setEditable(false);
+		// server.setOpaque(true);
+		// server.setWrapStyleWord(true);
+		// // server.setPreferredSize(new Dimension(200, 100));
+		// // server.setText(
+		// // "Registered with Server /127.0.0.1:7890 with user name 'anmol_e1'.
+		// server.setText("SERVER");
+		// // You can now use our services.");
+		// server.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+		// server.setBackground(new Color(196, 55, 37));
+		// server.setForeground(Color.WHITE);
+		// // server.setFont(server.getFont().deriveFont(Font.BOLD));
+		// server.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+		// gbc_server.gridwidth = 3;
+		// // gbc_button3.gridy = 0;
+		// chatPanel.add(server, gbc_server);
 
 		JTextArea area1 = new JTextArea();
 		GridBagConstraints gbc_area1 = new GridBagConstraints();
@@ -100,6 +101,7 @@ public class DynamicChatBox extends JFrame {
 		area1.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 		area1.setBackground(new Color(177, 188, 204));
 		gbc_area1.gridwidth = 2;
+		gbc_area1.weightx = 0;
 		// gbc_button3.gridy = 0;
 		// System.out.println("SIZE: " + area1.getSize());
 		chatPanel.add(area1, gbc_area1);
@@ -110,7 +112,9 @@ public class DynamicChatBox extends JFrame {
 		gbc_area2.fill = GridBagConstraints.HORIZONTAL;
 		gbc_area2.anchor = GridBagConstraints.WEST;
 		gbc_area2.gridx = 1;
-		area2.setText("Yo man\nWill get back");
+		area2.setLineWrap(true);
+		area2.setWrapStyleWord(true);
+		area2.setText("Yo man\nWill get back Will get back Will get back Will get backWill get backWill get back");
 		area2.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 		// area2.setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1,
 		// Color.BLACK));
@@ -118,6 +122,7 @@ public class DynamicChatBox extends JFrame {
 		area2.setBorder(BorderFactory.createTitledBorder("Anmol"));
 		area2.setBackground(new Color(201, 229, 219));
 		gbc_area2.gridwidth = 2;
+		gbc_area2.weightx = 1;
 		// gbc_button3.gridy = 0;
 		chatPanel.add(area2, gbc_area2);
 
@@ -135,6 +140,7 @@ public class DynamicChatBox extends JFrame {
 		area3.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 		area3.setBackground(new Color(177, 188, 204));
 		gbc_area3.gridwidth = 2;
+		gbc_area3.weightx = 0;
 		// gbc_button3.gridy = 0;
 		chatPanel.add(area3, gbc_area3);
 
@@ -151,6 +157,7 @@ public class DynamicChatBox extends JFrame {
 		area4.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 		area4.setBackground(new Color(201, 229, 219));
 		gbc_area4.gridwidth = 2;
+		gbc_area4.weightx = 1;
 		// gbc_button3.gridy = 0;
 		chatPanel.add(area4, gbc_area4);
 

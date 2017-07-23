@@ -1,5 +1,6 @@
 package com.app.client.chatWindowGUI;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -37,7 +38,7 @@ public class BroadcastPanel {
 		gbc_lblBroadcastUsersList.gridy = 0;
 		panel.add(lblBroadcastUsersList, gbc_lblBroadcastUsersList);
 
-		registeredClientslist = new RegisteredClientsList();
+		registeredClientslist = new RegisteredClientsList(client);
 		registeredClientslist.getList().addMouseListener(new RegisteredClientsListEventHandler(client));
 
 		JScrollPane listScroll = new JScrollPane(registeredClientslist.getList());
@@ -58,5 +59,11 @@ public class BroadcastPanel {
 
 	public void logoutAllFromLists() {
 		registeredClientslist.logoutAllFromLists();
+	}
+
+	public String getSelectedValues() {
+		String members = "";
+		members = registeredClientslist.getSelectedUserNames();
+		return members;
 	}
 }

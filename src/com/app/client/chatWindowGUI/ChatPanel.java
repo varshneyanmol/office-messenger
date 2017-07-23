@@ -17,7 +17,9 @@ import java.util.ResourceBundle;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -42,6 +44,7 @@ public class ChatPanel {
 	// private JTextPane chatHistory;
 	private JPanel chatHistory;
 	private JTextField messageField;
+	private JScrollPane chatHistoryScrollPane;
 
 	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
 	private String broadcastIdentifier = config.getString("broadcast-identifier");
@@ -79,10 +82,10 @@ public class ChatPanel {
 		// JScrollPane scrollPane = new JScrollPane(chatHistory);
 
 		chatHistory = new JPanel();
-		JScrollPane scrollPane = new JScrollPane(chatHistory);
+		chatHistoryScrollPane = new JScrollPane(chatHistory);
 
 		GridBagLayout gbl_chatHistory = new GridBagLayout();
-		gbl_chatHistory.columnWidths = new int[] { 10, 130, 160, 130, 10 };
+		gbl_chatHistory.columnWidths = new int[] { 10, 130, 200, 130, 10 };
 		gbl_chatHistory.rowHeights = new int[] { 0 };
 		gbl_chatHistory.columnWeights = new double[] { Double.MIN_VALUE };
 		gbl_chatHistory.rowWeights = new double[] { Double.MIN_VALUE };
@@ -97,7 +100,7 @@ public class ChatPanel {
 		gbc_scrollPane.gridheight = 2;
 		gbc_scrollPane.weightx = 1;
 		gbc_scrollPane.weighty = 1;
-		panel.add(scrollPane, gbc_scrollPane);
+		panel.add(chatHistoryScrollPane, gbc_scrollPane);
 
 		messageField = new JTextField();
 		messageField.addKeyListener(new KeyAdapter() {
@@ -170,18 +173,23 @@ public class ChatPanel {
 				 * the message to everybody in the group including the client
 				 * which has sent the message.
 				 */
-				console(message, client.getUserName());
+				this.console(message, client.getUserName());
 			}
 			client.sendMessage(message, chat);
 		}
 	}
 
 	public void console(String message, String userName) {
-		System.out.println("IN CONSOLE");
 		JTextArea area = new JTextArea();
 		area.setEditable(false);
 		area.setLineWrap(true);
 		area.setWrapStyleWord(true);
+		String arr[] = message.split("/n");
+		message = "";
+		for (int i = 0; i < arr.length; i++) {
+			System.out.println(arr[i]);
+			message = message + arr[i] + "\n";
+		}
 		area.setText(message);
 		area.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 		GridBagConstraints gbc_area = new GridBagConstraints();
@@ -195,12 +203,11 @@ public class ChatPanel {
 			} else {
 				area.setBackground(new Color(201, 229, 219));
 				gbc_area.gridx = 1;
-
 			}
-		} else if (chat instanceof Broadcast) {
-			System.out.println("IN BROADCAST IF CONDITION");
+			gbc_area.gridwidth = 2;
+
+		} else if (chat instanceof Broadcast || chat instanceof Group) {
 			if (client.getUserName().equals(userName)) {
-				System.out.println("IN BROADcast if condition with: " + client.getUserName());
 				area.setBackground(new Color(177, 188, 204));
 				gbc_area.gridx = 2;
 
@@ -209,14 +216,44 @@ public class ChatPanel {
 				gbc_area.gridx = 1;
 				area.setBorder(BorderFactory.createTitledBorder(userName));
 			}
-		} else if (chat instanceof Group) {
+			gbc_area.gridwidth = 2;
 
 		}
 
+		if (userName == null) {
+			area.setBackground(new Color(196, 55, 37));
+			gbc_area.gridx = 1;
+			gbc_area.gridwidth = 3;
+			area.setBorder(BorderFactory.createTitledBorder("Server"));
+
+		}
+
+		// else if (chat instanceof Group) {
+		// if (client.getUserName().equals(userName)) {
+		// area.setBackground(new Color(177, 188, 204));
+		// gbc_area.gridx = 2;
+		// } else {
+		// area.setBackground(new Color(201, 229, 219));
+		// gbc_area.gridx = 1;
+		// area.setBorder(BorderFactory.createTitledBorder(userName));
+		// }
+		// }
+
 		gbc_area.fill = GridBagConstraints.HORIZONTAL;
 		// gbc_area1.anchor = GridBagConstraints.EAST;
-		gbc_area.gridwidth = 2;
+		area.setVisible(true);
 		chatHistory.add(area, gbc_area);
+
+		/**
+		 * To add an JComponent and to set it visible JTabbedPane needs focus.
+		 */
+		JScrollBar vertical = chatHistoryScrollPane.getVerticalScrollBar();
+		vertical.setValue(vertical.getMaximumSize().height + 1);
+
+		System.out.println("FRAME" + this.panel.getParent().getParent().getParent().getClass().getName());
+		/// this.panel.getParent().getParent().getParent().getParent().requestFocusInWindow();
+		this.panel.getParent().requestFocusInWindow();
+		this.messageField.requestFocusInWindow();
 	}
 
 	// public void styleBroadcastMessage(String message) {
