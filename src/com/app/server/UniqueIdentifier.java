@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * getUniqueIdentifier() returns a unique random between [0, RANGE-1].
+ * getUniqueIdentifier() returns a unique random between [1, RANGE]. groupID '0'
+ * represents broadcast group.
  */
 public class UniqueIdentifier {
 	private static ArrayList<Integer> group_ids = new ArrayList<Integer>();
@@ -12,7 +13,7 @@ public class UniqueIdentifier {
 	private static int gindex = 0;
 
 	static {
-		for (int i = 0; i < RANGE; i++) {
+		for (int i = 1; i <= RANGE; i++) {
 			group_ids.add(i);
 		}
 		Collections.shuffle(group_ids);

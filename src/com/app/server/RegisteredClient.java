@@ -1,11 +1,15 @@
 package com.app.server;
 
+import java.util.Set;
+
 public class RegisteredClient {
 	private String id;
 	private String name;
 	private String designation;
 	private String userName;
 	private String password;
+
+	private Set<Group> groups;
 
 	public RegisteredClient() {
 
@@ -57,6 +61,14 @@ public class RegisteredClient {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Set<Group> getGroups() {
+		return groups;
+	}
+
+	public void setGroups(Set<Group> groups) {
+		this.groups = groups;
 	}
 
 }

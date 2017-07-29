@@ -4,18 +4,24 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ResourceBundle;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -227,6 +233,7 @@ public class MainChatWindow extends JFrame {
 		} else if (message.startsWith(groupIdentifier)) {
 
 		} else {
+			chatAreaPane.setSelectedIndex(0);
 			broadcast.getChatPanel().console(message, null);
 		}
 	}
@@ -247,6 +254,42 @@ public class MainChatWindow extends JFrame {
 
 	private void addPanel(String panelName, JPanel panel) {
 		chatAreaPane.add(panelName, panel);
+		int index = chatAreaPane.indexOfTab(panelName);
+
+		JPanel panelTitle = new JPanel();
+		panelTitle.setOpaque(false);
+		panelTitle.setLayout(new FlowLayout(FlowLayout.LEADING, 10, 0));
+
+		JLabel title = new JLabel(panelName);
+		Font titleFont = new Font(title.getFont().getFontName(), Font.BOLD, title.getFont().getSize());
+		title.setFont(titleFont);
+
+		JButton close = new JButton();
+		close.setIcon(new ImageIcon("src/com/app/client/resources/icons/close-inactive.png"));
+		close.setBorder(BorderFactory.createEmptyBorder());
+		close.setContentAreaFilled(false);
+
+		panelTitle.add(title);
+		panelTitle.add(close);
+
+		chatAreaPane.setTabComponentAt(index, panelTitle);
+		close.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				close.setIcon(new ImageIcon("src/com/app/client/resources/icons/close-active.png"));
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				close.setIcon(new ImageIcon("src/com/app/client/resources/icons/close-inactive.png"));
+			}
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int index = chatAreaPane.indexOfTab(title.getText());
+				System.out.println("index: " + index);
+			}
+		});
 	}
 
 	public void logoutAllFromLists() {
@@ -282,14 +325,14 @@ public class MainChatWindow extends JFrame {
 		return group;
 	}
 
-	public void addPrivateChat(String receiverID, String receiverUserName) {
-		PrivateChat privateChat = new PrivateChat(receiverID, receiverUserName, client);
+	public void addPrivateChat(String key, String receiverID, String receiverUserName) {
+		PrivateChat privateChat = new PrivateChat(key, receiverID, receiverUserName, client);
 		privateChats.add(privateChat);
 		addPanel(privateChat.getReceiverUserName(), privateChat.getPanel());
 	}
 
-	public void processPrivateChatMessage(String senderID, String message) {
-		PrivateChat privateChat = getPrivateChatByReceiverID(senderID);
+	public void processPrivateChatMessage(String privateChatID, String message) {
+		PrivateChat privateChat = getPrivateChat(privateChatID);
 		if (privateChat == null) {
 			return;
 		}
@@ -297,11 +340,11 @@ public class MainChatWindow extends JFrame {
 		privateChat.getChatPanel().console(message, privateChat.getReceiverUserName());
 	}
 
-	private PrivateChat getPrivateChatByReceiverID(String receiverID) {
+	private PrivateChat getPrivateChat(String privateChatID) {
 		PrivateChat privateChat = null;
 
 		for (int i = 0; i < privateChats.size(); i++) {
-			if (privateChats.get(i).getReceiverID().equals(receiverID)) {
+			if (privateChats.get(i).getId().equals(privateChatID)) {
 				privateChat = privateChats.get(i);
 				break;
 			}

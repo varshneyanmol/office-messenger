@@ -43,13 +43,8 @@ public class ChatPanel {
 
 	// private JTextPane chatHistory;
 	private JPanel chatHistory;
-	private JTextField messageField;
+	private JTextArea messageArea;
 	private JScrollPane chatHistoryScrollPane;
-
-	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
-	private String broadcastIdentifier = config.getString("broadcast-identifier");
-	private String groupIdentifier = config.getString("group-identifier");
-	private String identityIdentifier = config.getString("identity-identifier");
 
 	public ChatPanel(Client client) {
 		this.client = client;
@@ -102,24 +97,26 @@ public class ChatPanel {
 		gbc_scrollPane.weighty = 1;
 		panel.add(chatHistoryScrollPane, gbc_scrollPane);
 
-		messageField = new JTextField();
-		messageField.addKeyListener(new KeyAdapter() {
+		messageArea = new JTextArea();
+		JScrollPane messageAreaScroll = new JScrollPane(messageArea);
+		messageArea.setBorder(BorderFactory.createLineBorder(Color.darkGray, 1));
+		messageArea.addKeyListener(new KeyAdapter() {
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					sendMessage(messageField.getText());
+					sendMessage(messageArea.getText());
 				}
 			}
 		});
 		GridBagConstraints gbc_messageField = new GridBagConstraints();
 		gbc_messageField.insets = new Insets(0, 0, 0, 5);
-		gbc_messageField.fill = GridBagConstraints.HORIZONTAL;
+		gbc_messageField.fill = GridBagConstraints.BOTH;
 		gbc_messageField.gridx = 0;
 		gbc_messageField.gridy = 3;
 		gbc_messageField.gridwidth = 2;
 		gbc_messageField.weightx = 1;
 		gbc_messageField.weighty = 0;
-		panel.add(messageField, gbc_messageField);
-		messageField.setColumns(10);
+		panel.add(messageAreaScroll, gbc_messageField);
+		messageArea.setColumns(10);
 
 		JButton btnSend = new JButton();
 		btnSend.setIcon(new ImageIcon("src/com/app/client/resources/icons/send.png"));
@@ -127,7 +124,7 @@ public class ChatPanel {
 		btnSend.setContentAreaFilled(false);
 		btnSend.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				sendMessage(messageField.getText());
+				sendMessage(messageArea.getText());
 			}
 		});
 		btnSend.addMouseListener(new MouseAdapter() {
@@ -150,7 +147,7 @@ public class ChatPanel {
 		gbc_btnSend.weighty = 0;
 		panel.add(btnSend, gbc_btnSend);
 
-		messageField.requestFocusInWindow();
+		messageArea.requestFocusInWindow();
 	}
 
 	public JPanel getPanel() {
@@ -158,7 +155,7 @@ public class ChatPanel {
 	}
 
 	private void sendMessage(String message) {
-		messageField.setText("");
+		messageArea.setText("");
 		message = message.trim();
 		if (message.equals("")) {
 			return;
@@ -187,7 +184,6 @@ public class ChatPanel {
 		String arr[] = message.split("/n");
 		message = "";
 		for (int i = 0; i < arr.length; i++) {
-			System.out.println(arr[i]);
 			message = message + arr[i] + "\n";
 		}
 		area.setText(message);
@@ -217,7 +213,6 @@ public class ChatPanel {
 				area.setBorder(BorderFactory.createTitledBorder(userName));
 			}
 			gbc_area.gridwidth = 2;
-
 		}
 
 		if (userName == null) {
@@ -225,19 +220,7 @@ public class ChatPanel {
 			gbc_area.gridx = 1;
 			gbc_area.gridwidth = 3;
 			area.setBorder(BorderFactory.createTitledBorder("Server"));
-
 		}
-
-		// else if (chat instanceof Group) {
-		// if (client.getUserName().equals(userName)) {
-		// area.setBackground(new Color(177, 188, 204));
-		// gbc_area.gridx = 2;
-		// } else {
-		// area.setBackground(new Color(201, 229, 219));
-		// gbc_area.gridx = 1;
-		// area.setBorder(BorderFactory.createTitledBorder(userName));
-		// }
-		// }
 
 		gbc_area.fill = GridBagConstraints.HORIZONTAL;
 		// gbc_area1.anchor = GridBagConstraints.EAST;
@@ -250,51 +233,10 @@ public class ChatPanel {
 		JScrollBar vertical = chatHistoryScrollPane.getVerticalScrollBar();
 		vertical.setValue(vertical.getMaximumSize().height + 1);
 
-		System.out.println("FRAME" + this.panel.getParent().getParent().getParent().getClass().getName());
-		/// this.panel.getParent().getParent().getParent().getParent().requestFocusInWindow();
+		// System.out.println("FRAME" +
+		// this.panel.getParent().getParent().getParent().getClass().getName());
+		// this.panel.getParent().getParent().getParent().getParent().requestFocusInWindow();
 		this.panel.getParent().requestFocusInWindow();
-		this.messageField.requestFocusInWindow();
+		this.messageArea.requestFocusInWindow();
 	}
-
-	// public void styleBroadcastMessage(String message) {
-	// /**
-	// * gets a msg like: "username: message" prepares a styled message like:
-	// * "username<colored|bold>: message"
-	// */
-	// String[] arr = message.split(":");
-	// String userName = arr[0];
-	// message = arr[1];
-	//
-	// StyledDocument doc = chatHistory.getStyledDocument();
-	//
-	// SimpleAttributeSet attributes = new SimpleAttributeSet();
-	// attributes.addAttribute(StyleConstants.CharacterConstants.Bold,
-	// Boolean.TRUE);
-	// attributes.addAttribute(StyleConstants.CharacterConstants.Foreground, new
-	// Color(41, 137, 46));
-	//
-	// console(userName + ":", attributes, false);
-	// console(message, null, true);
-	//
-	// }
-	//
-	// public void console(String message, SimpleAttributeSet attributes,
-	// boolean newLine) {
-	// StyledDocument doc = chatHistory.getStyledDocument();
-	//
-	// if (newLine) {
-	// message = message + "\n\n";
-	// }
-	// try {
-	// doc.insertString(doc.getLength(), message, attributes);
-	// } catch (BadLocationException e) {
-	// e.printStackTrace();
-	// }
-	// // update the caret of the JtextArea at the latest message
-	// chatHistory.setCaretPosition(doc.getLength());
-	// }
-
-	// public JTextPane getChatHistory() {
-	// return chatHistory;
-	// }
 }

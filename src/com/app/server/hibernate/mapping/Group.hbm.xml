@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.app.server">
+	<class name="Group" table="groups">
+		<id name="id" type="int">
+			<column name="group_id"></column>
+			<generator class="assigned"></generator>
+		</id>
+
+		<property name="name" type="string">
+			<column name="name" not-null="true" length="100"></column>
+		</property>
+
+		<property name="createTime" type="timestamp">
+			<column name="create_time" not-null="true"></column>
+		</property>
+
+		<set name="members" table="group_members" lazy="true">
+			<key>
+				<column name="group_id" not-null="true"></column>
+			</key>
+			<many-to-many class="RegisteredClient" column="employee_id"></many-to-many>
+		</set>
+
+		<many-to-one name="creator">
+			<column name="creator_id" not-null="true"></column>
+		</many-to-one>
+	</class>
+</hibernate-mapping>

@@ -95,7 +95,7 @@ public class RegisteredClientsList {
 				 * clients. SO, if the first logged out client is found in the
 				 * list then it is guaranteed that no other elements below it
 				 * will be logged in. So I do not need to reverse their status
-				 * and I will simply return.
+				 * and It will simply return.
 				 */
 				return;
 			}

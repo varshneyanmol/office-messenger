@@ -15,5 +15,9 @@
 		<property name="hibernate.hbm2ddl.auto">update</property>
 
 		<mapping resource="com/app/server/hibernate/mapping/RegisteredClient.hbm.xml" />
+		<mapping resource="com/app/server/hibernate/mapping/Group.hbm.xml" />
+		<mapping resource="com/app/server/hibernate/mapping/PrivateChat.hbm.xml" />
+		<mapping resource="com/app/server/hibernate/mapping/Message.hbm.xml" />
+		<mapping resource="com/app/server/hibernate/mapping/Pending.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

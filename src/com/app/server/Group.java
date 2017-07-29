@@ -1,21 +1,33 @@
 package com.app.server;
 
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.Set;
 
 public class Group {
 	private int id;
 	private String name;
-	private ArrayList<String> memberIDs;
+	private Date createTime;
+	private Set<RegisteredClient> members;
 
-	public Group(int id, String name, ArrayList<String> memberIDs) {
+	private RegisteredClient creator;
+
+	public Group() {
+
+	}
+
+	public Group(int id, String name, Date createTime) {
 		super();
 		this.id = id;
 		this.name = name;
-		this.memberIDs = memberIDs;
+		this.createTime = createTime;
 	}
 
 	public int getId() {
 		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 
 	public String getName() {
@@ -26,12 +38,27 @@ public class Group {
 		this.name = name;
 	}
 
-	public ArrayList<String> getMemberIDs() {
-		return memberIDs;
+	public RegisteredClient getCreator() {
+		return creator;
 	}
 
-	public void setMemberIDs(ArrayList<String> memberIDs) {
-		this.memberIDs = memberIDs;
+	public void setCreator(RegisteredClient creator) {
+		this.creator = creator;
 	}
 
+	public Date getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
+
+	public Set<RegisteredClient> getMembers() {
+		return members;
+	}
+
+	public void setMembers(Set<RegisteredClient> members) {
+		this.members = members;
+	}
 }

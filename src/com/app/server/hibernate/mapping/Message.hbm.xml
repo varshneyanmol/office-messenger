@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.app.server.hibernate.model">
+	<class name="Message" table="message">
+		<id name="id" type="long">
+			<column name="message_id"></column>
+			<generator class="identity"></generator>
+		</id>
+
+		<property name="body" type="string">
+			<column name="body"></column>
+		</property>
+
+		<property name="time" type="timestamp">
+			<column name="message_time" not-null="true"></column>
+		</property>
+
+		<many-to-one name="sender">
+			<column name="sender_id"></column>
+		</many-to-one>
+
+		<many-to-one name="parent">
+			<column name="parent_message_id" unique="true"></column>
+		</many-to-one>
+
+		<joined-subclass name="GroupMessage" table="group_message">
+			<key>
+				<column name="group_message_id"></column>
+			</key>
+
+			<many-to-one name="group">
+				<column name="group_id"></column>
+			</many-to-one>
+		</joined-subclass>
+
+		<joined-subclass name="PrivateMessage" table="private_message">
+			<key>
+				<column name="private_message_id"></column>
+			</key>
+
+			<many-to-one name="privateChat">
+				<column name="private_chat_id"></column>
+			</many-to-one>
+		</joined-subclass>
+
+	</class>
+</hibernate-mapping>

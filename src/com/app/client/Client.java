@@ -30,7 +30,7 @@ public class Client {
 	private PrivateChat privateChat;
 	private Group group;
 
-	private final int BROADCAST_GROUP_ID = 0;
+	// private final int BROADCAST_GROUP_ID = 0;
 
 	private ResourceBundle config = ResourceBundle.getBundle("com.app.config");
 	private String registerIdentifier = config.getString("register-identifier");
@@ -46,6 +46,7 @@ public class Client {
 	private String errorIdentifier = config.getString("error-identifier");
 	private String updateListIdentifier = config.getString("update-list-identifier");
 	private String listClientsIdentifier = config.getString("list-clients-identifier");
+	private String pingIdentifier = config.getString("ping-identifier");
 
 	private MainChatWindow mainChatWindow;
 
@@ -117,9 +118,15 @@ public class Client {
 
 	private void process(DatagramPacket packet) {
 		String message = new String(packet.getData()).trim();
-		System.out.println("RECEIVED: " + message);
+		// System.out.println("RECEIVED: " + message);
 
-		if (message.startsWith(broadcastIdentifier)) {
+		if (message.startsWith(pingIdentifier)) {
+			/**
+			 * receives a msg like: "/z/"
+			 */
+			pingBack();
+
+		} else if (message.startsWith(broadcastIdentifier)) {
 			mainChatWindow.process(message);
 
 		} else if (message.startsWith(registerIdentifier)) {
@@ -168,6 +175,14 @@ public class Client {
 		}
 	}
 
+	private void pingBack() {
+		/**
+		 * sends a msg like: "/z/clientID"
+		 */
+		String message = pingIdentifier + this.id;
+		send(message);
+	}
+
 	private void processGroupMessage(String message) {
 		if (message.startsWith(chatFormIdentifier)) {
 			/**
@@ -193,26 +208,26 @@ public class Client {
 	private void processPrivateChatMessage(String message) {
 		if (message.startsWith(privateMessageIdentifier)) {
 			/**
-			 * receives a msg like: "/m/senderID/i/message"
+			 * receives a msg like: "/m/privateChatID/i/message"
 			 */
 			String[] arr = message.split(privateMessageIdentifier + "|" + identityIdentifier);
-			String senderID = arr[1];
+			String privateChatID = arr[1];
 			message = arr[2];
-			mainChatWindow.processPrivateChatMessage(senderID, message);
+			mainChatWindow.processPrivateChatMessage(privateChatID, message);
 
 		} else if (message.startsWith(chatFormIdentifier)) {
 			/**
-			 * receives a msg like: "/f/senderID/i/senderUsername"
+			 * receives a msg like: "/f/id/i/senderID/i/senderUsername"
 			 */
 			String[] arr = message.split(chatFormIdentifier + "|" + identityIdentifier);
-			mainChatWindow.addPrivateChat(arr[1], arr[2]);
+			mainChatWindow.addPrivateChat(arr[1], arr[2], arr[3]);
 
 		} else if (message.startsWith(ackIdentifier)) {
 			/**
-			 * receives a ack like: "/a/receiverID/i/receiverUserName"
+			 * receives a ack like: "/a/key/i/receiverID/i/receiverUserName"
 			 */
 			String[] arr = message.split(ackIdentifier + "|" + identityIdentifier);
-			mainChatWindow.addPrivateChat(arr[1], arr[2]);
+			mainChatWindow.addPrivateChat(arr[1], arr[2], arr[3]);
 
 		} else if (message.startsWith("")) {
 
@@ -342,10 +357,10 @@ public class Client {
 		if (chat instanceof PrivateChat) {
 			privateChat = (PrivateChat) chat;
 			/**
-			 * sends a msg like: "/p//m/senderID/i/receiverID/i/message"
+			 * sends a msg like: "/p//m/id/i/senderID/i/receiverID/i/message"
 			 */
-			message = privateChatIdentifier + privateMessageIdentifier + this.id + identityIdentifier
-					+ privateChat.getReceiverID() + identityIdentifier + message;
+			message = privateChatIdentifier + privateMessageIdentifier + privateChat.getId() + identityIdentifier
+					+ this.id + identityIdentifier + privateChat.getReceiverID() + identityIdentifier + message;
 
 		} else if (chat instanceof Group) {
 			group = (Group) chat;
@@ -355,13 +370,13 @@ public class Client {
 			message = groupIdentifier + privateMessageIdentifier + group.getId() + identityIdentifier + this.id
 					+ identityIdentifier + message;
 
-			System.out.println("MESSAGE GROUP: " + message);
+			// System.out.println("MESSAGE GROUP: " + message);
 		} else if (chat instanceof Broadcast) {
 			/**
 			 * sends a msg like: "/b/clientID/i/message"
 			 */
 			message = broadcastIdentifier + this.id + identityIdentifier + message;
-			System.out.println("Broadcasting message: " + message);
+			// System.out.println("Broadcasting message: " + message);
 		}
 
 		clientNetworking.send(message.getBytes());

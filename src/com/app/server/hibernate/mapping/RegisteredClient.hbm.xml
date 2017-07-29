@@ -26,5 +26,12 @@
 			<column name="password" not-null="true"></column>
 		</property>
 
+		<set name="groups" table="group_members" inverse="true" lazy="true">
+			<key>
+				<column name="employee_id" not-null="true"></column>
+			</key>
+			<many-to-many class="Group" column="group_id"></many-to-many>
+		</set>
+
 	</class>
 </hibernate-mapping>
