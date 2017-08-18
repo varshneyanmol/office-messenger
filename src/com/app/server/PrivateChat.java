@@ -2,6 +2,8 @@ package com.app.server;
 
 import java.util.Date;
 
+import com.app.server.hibernate.model.RegisteredClient;
+
 public class PrivateChat {
 	private String id;
 	private RegisteredClient client1;

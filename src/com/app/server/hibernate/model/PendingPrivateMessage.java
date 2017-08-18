@@ -1,7 +1,6 @@
 package com.app.server.hibernate.model;
 
 import com.app.server.PrivateChat;
-import com.app.server.RegisteredClient;
 
 public class PendingPrivateMessage extends Pending {
 	private Message latestMessage;

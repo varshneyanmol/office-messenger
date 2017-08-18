@@ -1,7 +1,5 @@
 package com.app.server.hibernate.model;
 
-import com.app.server.RegisteredClient;
-
 public class Pending {
 	private long id;
 	private RegisteredClient client;

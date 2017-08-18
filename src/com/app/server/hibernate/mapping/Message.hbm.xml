@@ -18,15 +18,16 @@
 			<column name="message_time" not-null="true"></column>
 		</property>
 
-		<many-to-one name="sender">
+		<many-to-one name="sender" lazy="false">
 			<column name="sender_id"></column>
 		</many-to-one>
 
-		<many-to-one name="parent">
+		<many-to-one name="parent" lazy="false">
 			<column name="parent_message_id" unique="true"></column>
 		</many-to-one>
 
-		<joined-subclass name="GroupMessage" table="group_message">
+		<joined-subclass name="GroupMessage" table="group_message"
+			lazy="false">
 			<key>
 				<column name="group_message_id"></column>
 			</key>
@@ -36,7 +37,8 @@
 			</many-to-one>
 		</joined-subclass>
 
-		<joined-subclass name="PrivateMessage" table="private_message">
+		<joined-subclass name="PrivateMessage" table="private_message"
+			lazy="false">
 			<key>
 				<column name="private_message_id"></column>
 			</key>

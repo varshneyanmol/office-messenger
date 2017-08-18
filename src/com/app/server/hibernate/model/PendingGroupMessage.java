@@ -1,7 +1,6 @@
 package com.app.server.hibernate.model;
 
-import com.app.server.Group;
-import com.app.server.RegisteredClient;
+import com.app.server.hibernate.model.Group;
 
 public class PendingGroupMessage extends Pending {
 	private Message latestMessage;

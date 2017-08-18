@@ -1,58 +1,66 @@
 package com.app.server;
 
-import java.io.FileNotFoundException;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Test {
 	public static void main(String[] args) {
-
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				System.out.println(i + " " + j);
-				if (j == 2) {
-					break;
-				}
-			}
+		ServerSocket serverSocket;
+		Socket socket = null;
+		try {
+			serverSocket = new ServerSocket(7890);
+			socket = serverSocket.accept();
+			System.out.println("TCP socket running");
+		} catch (IOException e) {
+			System.out.println("Could not open TCP socket at port 7890");
+			e.printStackTrace();
 		}
-		
-//		String name = "/r/clientUserName/i/groupID";
-//		String[] arr = name.split("/r/|/i/");
-//		System.out.println(arr.length);
-//		for (int i = 0; i < arr.length; i++) {
-//			System.out.println(arr[i]);
-//		}
 
-		// Properties properties = new Properties();
-		// properties.setProperty("uname", "Anmol");
-		// properties.setProperty("password", "anaconda");
+		// InputStreamReader isr = null;
 		// try {
-		// OutputStream outputStream = new
-		// FileOutputStream("src/com/app/myProp.properties");
-		// properties.store(outputStream, "storing into PROPEEEEERtY FILE");
-		// System.out.println("printed");
-		// } catch (FileNotFoundException e) {
-		// e.printStackTrace();
+		// isr = new InputStreamReader(socket.getInputStream());
+		// } catch (IOException e1) {
+		// e1.printStackTrace();
+		// }
+		// BufferedReader br = new BufferedReader(isr);
+		// String received = null;
+		// try {
+		// received = br.readLine();
 		// } catch (IOException e) {
 		// e.printStackTrace();
 		// }
-		//
-		// ResourceBundle config = ResourceBundle.getBundle("com.app.myProp");
-		// System.out.println("uname: " + config.getString("uname"));
-		// System.out.println("password: " + config.getString("password"));
 
-		// InetAddress ip = null;
-		// try {
-		// ip = InetAddress.getByName("127.0.0.1");
-		// } catch (UnknownHostException e) {
-		// e.printStackTrace();
-		// }
-		// System.out.println("InetAddress: " + ip.getHostAddress());
+		byte[] mybytearray = new byte[3500000];
+		FileInputStream is;
+		try {
+			is = (FileInputStream) socket.getInputStream();
+			// FileOutputStream fos = new
+			// FileOutputStream("src/com/app/client/resources/demoFile1.txt");
+			FileOutputStream fos = new FileOutputStream("/home/hduser/Documents/video.webm");
+			BufferedOutputStream bos = new BufferedOutputStream(fos);
+			int bytesRead = is.read(mybytearray, 0, mybytearray.length);
 
+			int current = bytesRead;
+			do {
+				bytesRead = is.read(mybytearray, current, mybytearray.length - current);
+				if (bytesRead >= 0) {
+					current = current + bytesRead;
+				}
+			} while (bytesRead > -1);
+
+			bos.write(mybytearray, 0, current);
+			bos.flush();
+
+			System.out.println("File received server.");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// System.out.println("message received at SERVER: " + received);
 	}
 }

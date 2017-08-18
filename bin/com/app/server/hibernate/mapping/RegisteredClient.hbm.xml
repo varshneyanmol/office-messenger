@@ -3,7 +3,7 @@
     "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
     "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
-<hibernate-mapping package="com.app.server">
+<hibernate-mapping package="com.app.server.hibernate.model">
 	<class name="RegisteredClient" table="registered_client">
 		<id name="id" type="string">
 			<column name="employee_id"></column>
@@ -24,6 +24,10 @@
 
 		<property name="password" type="string">
 			<column name="password" not-null="true"></column>
+		</property>
+
+		<property name="createTime" type="timestamp">
+			<column name="create_time" not-null="true"></column>
 		</property>
 
 		<set name="groups" table="group_members" inverse="true" lazy="true">

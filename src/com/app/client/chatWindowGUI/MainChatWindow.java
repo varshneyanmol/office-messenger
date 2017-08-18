@@ -104,8 +104,21 @@ public class MainChatWindow extends JFrame {
 		});
 		mnFile.add(formGroup);
 
+		JMenuItem central = new JMenuItem("Central");
+		central.addActionListener(e -> {
+			client.central();
+		});
+		mnFile.add(central);
+
 		JMenu mnSettings = new JMenu("Settings");
 		menuBar.add(mnSettings);
+
+		JMenuItem hotKeys = new JMenuItem("Hot Keys");
+		hotKeys.addActionListener(e -> {
+			client.hotKeys();
+		});
+		mnSettings.add(hotKeys);
+
 		JMenuItem logout = new JMenuItem("Logout");
 		logout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

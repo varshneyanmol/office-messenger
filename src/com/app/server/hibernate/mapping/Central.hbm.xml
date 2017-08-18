@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.app.server.hibernate.model">
+	<class name="Central" table="central">
+		<id name="id" type="int">
+			<column name="central_id"></column>
+			<generator class="identity"></generator>
+		</id>
+
+		<many-to-one name="sender">
+			<column name="sender_id" not-null="true"></column>
+		</many-to-one>
+
+		<property name="fileName" type="string">
+			<column name="file_name" not-null="true" length="200"></column>
+		</property>
+
+		<property name="uploadTime" type="timestamp">
+			<column name="upload_time" not-null="true"></column>
+		</property>
+
+	</class>
+</hibernate-mapping>

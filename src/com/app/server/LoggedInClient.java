@@ -2,6 +2,8 @@ package com.app.server;
 
 import java.net.InetAddress;
 
+import com.app.server.hibernate.model.RegisteredClient;
+
 public class LoggedInClient {
 	private RegisteredClient client;
 	private InetAddress ip;

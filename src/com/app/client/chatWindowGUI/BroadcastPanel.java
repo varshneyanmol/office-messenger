@@ -1,6 +1,5 @@
 package com.app.client.chatWindowGUI;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -10,6 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import com.app.client.Client;
+import com.app.client.chatWindowGUI.list.RegisteredClientsList;
+import com.app.client.chatWindowGUI.list.RegisteredClientsListEventHandler;
 
 public class BroadcastPanel {
 	private Client client;
@@ -54,7 +55,7 @@ public class BroadcastPanel {
 	}
 
 	public void updateClient(String clientUserName, boolean isOnline) {
-		registeredClientslist.updateClient(clientUserName, isOnline);
+		registeredClientslist.updateItem(clientUserName, isOnline);
 	}
 
 	public void logoutAllFromLists() {

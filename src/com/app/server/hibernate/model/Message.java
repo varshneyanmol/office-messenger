@@ -2,8 +2,6 @@ package com.app.server.hibernate.model;
 
 import java.util.Date;
 
-import com.app.server.RegisteredClient;
-
 public class Message {
 	private long id;
 	private Message parent;

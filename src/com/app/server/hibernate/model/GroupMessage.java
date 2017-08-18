@@ -2,8 +2,7 @@ package com.app.server.hibernate.model;
 
 import java.util.Date;
 
-import com.app.server.Group;
-import com.app.server.RegisteredClient;
+import com.app.server.hibernate.model.Group;
 
 public class GroupMessage extends Message {
 	private Group group;

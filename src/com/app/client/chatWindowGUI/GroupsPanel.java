@@ -4,10 +4,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+import com.app.client.chatWindowGUI.list.ListEntryItem;
 
 import com.app.client.Client;
 
@@ -37,8 +41,23 @@ public class GroupsPanel {
 		panel.add(lblGroupUsersList, gbc_lblGroupUsersList);
 
 		GroupUsersList userlist = new GroupUsersList();
-		JList<String> list = userlist.getList();
-		JScrollPane groupScroll = new JScrollPane(list);
+
+		// JList<String> list = userlist.getList();
+
+		DefaultMutableTreeNode root = new DefaultMutableTreeNode("Group 1");
+
+		ImageIcon onlineClientIcon = new ImageIcon("src/com/app/client/resources/icons/onlineClient.png");
+		ImageIcon offlineClientIcon = new ImageIcon("src/com/app/client/resources/icons/offlineClient.png");
+
+		DefaultMutableTreeNode user1 = new DefaultMutableTreeNode(new ListEntryItem("user 1", onlineClientIcon));
+		DefaultMutableTreeNode user2 = new DefaultMutableTreeNode(new ListEntryItem("user 2", offlineClientIcon));
+
+		root.add(user1);
+		root.add(user2);
+
+		JTree groupTree = new JTree(root);
+
+		JScrollPane groupScroll = new JScrollPane(groupTree);
 		GridBagConstraints gbc_list_1 = new GridBagConstraints();
 		gbc_list_1.fill = GridBagConstraints.BOTH;
 		gbc_list_1.gridx = 0;

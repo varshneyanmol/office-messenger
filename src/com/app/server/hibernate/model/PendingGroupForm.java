@@ -1,7 +1,7 @@
 package com.app.server.hibernate.model;
 
-import com.app.server.Group;
-import com.app.server.RegisteredClient;
+import com.app.server.LoggedInClient;
+import com.app.server.hibernate.model.Group;;
 
 public class PendingGroupForm extends Pending {
 	private Group group;
@@ -21,5 +21,4 @@ public class PendingGroupForm extends Pending {
 	public void setGroup(Group group) {
 		this.group = group;
 	}
-
 }

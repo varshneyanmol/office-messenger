@@ -12,11 +12,13 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -46,6 +48,8 @@ public class ChatPanel {
 	private JTextArea messageArea;
 	private JScrollPane chatHistoryScrollPane;
 
+	private JFileChooser fileChooser;
+
 	public ChatPanel(Client client) {
 		this.client = client;
 		panel = new JPanel();
@@ -65,8 +69,11 @@ public class ChatPanel {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		fileChooser = new JFileChooser();
+
 		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 10, 540, 50 };
+		gbl_contentPane.columnWidths = new int[] { 10, 490, 50, 50 };
 		gbl_contentPane.rowHeights = new int[] { 10, 15, 340, 55 };
 		panel.setLayout(gbl_contentPane);
 
@@ -91,7 +98,7 @@ public class ChatPanel {
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridx = 0;
 		gbc_scrollPane.gridy = 1;
-		gbc_scrollPane.gridwidth = 3;
+		gbc_scrollPane.gridwidth = 4;
 		gbc_scrollPane.gridheight = 2;
 		gbc_scrollPane.weightx = 1;
 		gbc_scrollPane.weighty = 1;
@@ -141,13 +148,51 @@ public class ChatPanel {
 			}
 		});
 		GridBagConstraints gbc_btnSend = new GridBagConstraints();
-		gbc_btnSend.gridx = 2;
+		gbc_btnSend.gridx = 3;
 		gbc_btnSend.gridy = 3;
 		gbc_btnSend.weightx = 0;
 		gbc_btnSend.weighty = 0;
 		panel.add(btnSend, gbc_btnSend);
 
+		JButton btnAttach = new JButton();
+		btnAttach.setIcon(new ImageIcon("src/com/app/client/resources/icons/attach.png"));
+		btnAttach.setBorder(BorderFactory.createEmptyBorder());
+		btnAttach.setContentAreaFilled(false);
+		btnAttach.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				browseFile();
+
+			}
+		});
+		btnAttach.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				Point point = btnAttach.getLocation();
+				btnAttach.setLocation(new Point(point.x + 4, point.y));
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				Point point = btnAttach.getLocation();
+				btnAttach.setLocation(new Point(point.x - 4, point.y));
+			}
+		});
+		GridBagConstraints gbc_btnAttach = new GridBagConstraints();
+		gbc_btnAttach.gridx = 2;
+		gbc_btnAttach.gridy = 3;
+		gbc_btnAttach.weightx = 0;
+		gbc_btnAttach.weighty = 0;
+		panel.add(btnAttach, gbc_btnAttach);
+
 		messageArea.requestFocusInWindow();
+	}
+
+	protected void browseFile() {
+		int result = fileChooser.showOpenDialog(this.panel);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File selectedFile = fileChooser.getSelectedFile();
+			client.sendFile(selectedFile, chat);
+		}
 	}
 
 	public JPanel getPanel() {

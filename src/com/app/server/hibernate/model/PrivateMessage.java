@@ -3,7 +3,6 @@ package com.app.server.hibernate.model;
 import java.util.Date;
 
 import com.app.server.PrivateChat;
-import com.app.server.RegisteredClient;
 
 public class PrivateMessage extends Message {
 	private PrivateChat privateChat;
@@ -25,4 +24,9 @@ public class PrivateMessage extends Message {
 		this.privateChat = privateChat;
 	}
 
+	@Override
+	public String toString() {
+		String str = privateChat.getId() + " : " + this.getId() + " : " + this.getBody();
+		return str;
+	}
 }
